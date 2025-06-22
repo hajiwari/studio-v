@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Studio V - Premium Clothing</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <h2>Studio V</h2>
+            </div>
+            <div class="nav-menu">
+                <a href="#home" class="nav-link">Home</a>
+                <a href="#products" class="nav-link">Products</a>
+                <a href="#about" class="nav-link">About</a>
+                <a href="#contact" class="nav-link">Contact Us</a>
+            </div>
+            <div class="nav-actions">
+                <button class="cart-btn" onclick="window.location.href='cart.html'">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span class="cart-count">0</span>
+                </button>
+                <button class="auth-btn" onclick="showAuthModal()">
+                    <i class="fas fa-user"></i>
+                    <span class="auth-text">Sign In</span>
+                </button>
+            </div>
+            <div class="hamburger" onclick="toggleMobileMenu()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Landing Page -->
+    <section id="landing" class="landing-section">
+        <div class="hero-bg-carousel">
+            <div class="hero-bg-slide active" style="background-image: url('images/hero-image1.png');"></div>
+            <div class="hero-bg-slide" style="background-image: url('images/hero-image2.jpg');"></div>
+            <div class="hero-bg-slide" style="background-image: url('images/hero-image3.png');"></div>
+        </div>
+        <div class="hero-container">
+            <div class="hero-content">
+                <h1 class="hero-title">Welcome to</h1>
+                <h1 class="hero-title">Studio V</h1>
+                <p class="hero-subtitle">Discover premium clothing that defines your style</p>
+                <div class="hero-buttons">
+                    <button class="btn-primary" onclick="showAuthModal()">Get Started</button>
+                    <button class="btn-secondary" onclick="scrollToProducts()">See Products</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Home/Products Section -->
+    <section id="products" class="products-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>Featured Products</h2>
+                <div class="filter-tabs">
+                    <button class="filter-btn active" data-filter="all">All</button>
+                    <button class="filter-btn" data-filter="men">Men</button>
+                    <button class="filter-btn" data-filter="women">Women</button>
+                    <button class="filter-btn" data-filter="accessories">Accessories</button>
+                </div>
+            </div>
+            <div class="products-grid" id="productsGrid">
+                <!-- Products will be dynamically loaded -->
+            </div>
+            <div class="load-more-container">
+                <button class="btn-outline" onclick="loadMoreProducts()">Load More</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Cart Sidebar -->
+    <div class="cart-sidebar" id="cartSidebar">
+        <div class="cart-header">
+            <h3>Shopping Cart</h3>
+            <button class="close-cart" onclick="toggleCart()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="cart-items" id="cartItems">
+            <!-- Cart items will be dynamically loaded -->
+        </div>
+        <div class="cart-empty" id="emptyCart" style="display: none;">
+            <i class="fas fa-shopping-cart"></i>
+            <p>Your cart is empty</p>
+        </div>
+        <div class="cart-footer">
+            <div class="cart-total">
+                <span>Total: ₱<span id="cartTotal">0.00</span></span>
+            </div>
+            <button class="btn-primary checkout-btn" onclick="proceedToCheckout()">
+                Proceed to Checkout
+            </button>
+        </div>
+    </div>
+
+    <!-- Auth Modal -->
+    <div class="modal-overlay" id="authModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="authTitle">Sign In</h3>
+                <button class="close-modal" onclick="hideAuthModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="authForm">
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" required>
+                    </div>
+                    <div class="form-group" id="nameGroup" style="display: none;">
+                        <label for="fullName">Full Name</label>
+                        <input type="text" id="fullName">
+                    </div>
+                    <button type="submit" class="btn-primary" id="authSubmit">Sign In</button>
+                </form>
+                <div class="auth-switch">
+                    <p id="authSwitchText">Don't have an account?
+                        <span class="auth-link" onclick="toggleAuthMode()">Sign Up</span>
+                    </p>
+                </div>
+                <div class="social-auth">
+                    <button class="btn-google" onclick="signInWithGoogle()">
+                        <i class="fab fa-google"></i> Continue with Google
+                    </button>
+                    <button class="btn-github" onclick="signInWithGitHub()">
+                        <i class="fab fa-github"></i> Continue with GitHub
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Checkout Modal -->
+    <div class="modal-overlay" id="checkoutModal">
+        <div class="modal modal-large">
+            <div class="modal-header">
+                <h3>Checkout</h3>
+                <button class="close-modal" onclick="hideCheckoutModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="checkout-container">
+                    <div class="checkout-section">
+                        <h4>Shipping Information</h4>
+                        <form id="checkoutForm">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="firstName">First Name</label>
+                                    <input type="text" id="firstName" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="lastName">Last Name</label>
+                                    <input type="text" id="lastName" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="address">Address</label>
+                                <input type="text" id="address" required>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="city">City</label>
+                                    <input type="text" id="city" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="zipCode">ZIP Code</label>
+                                    <input type="text" id="zipCode" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="phone">Phone Number</label>
+                                <input type="tel" id="phone" required>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="order-summary">
+                        <h4>Order Summary</h4>
+                        <div class="summary-items" id="summaryItems">
+                            <!-- Order items will be populated here -->
+                        </div>
+                        <div class="summary-total">
+                            <div class="total-line">
+                                <span>Subtotal:</span>
+                                <span>₱<span id="subtotal">0.00</span></span>
+                            </div>
+                            <div class="total-line">
+                                <span>Shipping:</span>
+                                <span>₱<span id="shipping">9.99</span></span>
+                            </div>
+                            <div class="total-line total-final">
+                                <span>Total:</span>
+                                <span>₱<span id="finalTotal">0.00</span></span>
+                            </div>
+                        </div>
+                        <button class="btn-primary place-order-btn" onclick="placeOrder()">
+                            Place Order
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Account Settings Modal -->
+    <div class="modal-overlay" id="accountModal">
+        <div class="modal modal-large">
+            <div class="modal-header">
+                <h3>Account Settings</h3>
+                <button class="close-modal" onclick="hideAccountModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="account-tabs">
+                    <button class="tab-btn active" onclick="showTab('profile')">Profile</button>
+                    <button class="tab-btn" onclick="showTab('orders')">Orders</button>
+                    <button class="tab-btn" onclick="showTab('addresses')">Addresses</button>
+                    <button class="tab-btn" onclick="showTab('delivery')">Delivery Options</button>
+                </div>
+
+                <div class="tab-content">
+                    <div class="tab-pane active" id="profile">
+                        <form id="profileForm">
+                            <div class="form-group">
+                                <label for="profileName">Full Name</label>
+                                <input type="text" id="profileName">
+                            </div>
+                            <div class="form-group">
+                                <label for="profileEmail">Email</label>
+                                <input type="email" id="profileEmail" disabled>
+                            </div>
+                            <div class="form-group">
+                                <label for="profilePhone">Phone</label>
+                                <input type="tel" id="profilePhone">
+                            </div>
+                            <button type="submit" class="btn-primary">Update Profile</button>
+                        </form>
+                    </div>
+
+                    <div class="tab-pane" id="orders">
+                        <div class="orders-list" id="ordersList">
+                            <!-- Orders will be populated here -->
+                        </div>
+                    </div>
+
+                    <div class="tab-pane" id="addresses">
+                        <div class="addresses-list" id="addressesList">
+                            <!-- Addresses will be populated here -->
+                        </div>
+                        <button class="btn-outline" onclick="addNewAddress()">Add New Address</button>
+                    </div>
+
+                    <div class="tab-pane" id="delivery">
+                        <div class="delivery-options">
+                            <div class="option-group">
+                                <h4>Preferred Delivery Time</h4>
+                                <label><input type="radio" name="deliveryTime" value="morning"> Morning (9AM -
+                                    12PM)</label>
+                                <label><input type="radio" name="deliveryTime" value="afternoon"> Afternoon (12PM -
+                                    6PM)</label>
+                                <label><input type="radio" name="deliveryTime" value="evening"> Evening (6PM -
+                                    9PM)</label>
+                            </div>
+                            <div class="option-group">
+                                <h4>Delivery Instructions</h4>
+                                <textarea id="deliveryInstructions"
+                                    placeholder="Special delivery instructions..."></textarea>
+                            </div>
+                            <button class="btn-primary" onclick="saveDeliveryOptions()">Save Preferences</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- About Section -->
+    <section id="about" class="about-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>About <span class="highlight-v">Studio V</span></h2>
+            </div>
+            <div class="about-content">
+                <div class="about-intro">
+                    <p>
+                        <span class="about-highlight">Studio V</span> is a <strong>family-owned premium clothing
+                            brand</strong> proudly based in <span class="about-location">Bulacan, Philippines</span>.
+                        Since our founding in <strong>2025</strong>, we have been on a mission to redefine modern
+                        fashion by blending <span class="about-keyword">timeless elegance</span> with <span
+                            class="about-keyword">everyday comfort</span> and a <span class="about-keyword">deep sense
+                            of purpose</span>.
+                    </p>
+                </div>
+                <div class="about-columns">
+                    <div class="about-left">
+                        <h3 class="about-title"><i class="fas fa-users"></i> Our Story</h3>
+                        <ul class="about-list">
+                            <li>
+                                <strong>The Meaning of "V":</strong> The “V” in Studio V stands for <span
+                                    class="about-highlight">“5J”</span>, representing the five members of our family—all
+                                sharing the first initial <span class="about-highlight">J</span>.
+                            </li>
+                            <li>
+                                <strong>Family Inspiration:</strong> The brand is inspired by our youngest, <span
+                                    class="about-highlight">Vivienne</span>, whose creativity and spirit shape our
+                                vision.
+                            </li>
+                            <li>
+                                <strong>Rooted in Community:</strong> We are deeply connected to our Bulacan roots,
+                                collaborating with local artisans and supporting our community.
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="about-right">
+                        <h3 class="about-title"><i class="fas fa-leaf"></i> What We Stand For</h3>
+                        <ul class="about-values">
+                            <li><span class="about-icon"><i class="fas fa-check-circle"></i></span> <strong>Ethical
+                                    Sourcing & Fair Labor</strong></li>
+                            <li><span class="about-icon"><i class="fas fa-leaf"></i></span> <strong>Sustainable
+                                    Materials</strong> for a healthier planet</li>
+                            <li><span class="about-icon"><i class="fas fa-lightbulb"></i></span> <strong>Intentional
+                                    Design</strong> that reflects authenticity</li>
+                            <li><span class="about-icon"><i class="fas fa-heart"></i></span> <strong>Family, Community,
+                                    and Conscious Living</strong></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="about-mission">
+                    <h3 class="about-title"><i class="fas fa-bullseye"></i> Our Mission</h3>
+                    <ul class="about-mission-list">
+                        <li>To help you express your individuality with <span class="about-keyword">confidence</span>
+                            and <span class="about-keyword">comfort</span>.</li>
+                        <li>To create clothing and accessories that are <span class="about-keyword">stylish</span>,
+                            <span class="about-keyword">soulful</span>, and <span class="about-keyword">responsibly
+                                made</span>.</li>
+                        <li>To make style more <span class="about-keyword">personal</span>, <span
+                                class="about-keyword">responsible</span>, and <span
+                                class="about-keyword">inspiring</span>.</li>
+                    </ul>
+                </div>
+                <div class="about-extra">
+                    <blockquote class="about-quote">
+                        <i class="fas fa-quote-left"></i>
+                        <span>
+                            “Studio V isn't just about fashion—it's about <strong>family</strong>,
+                            <strong>community</strong>, and <strong>conscious living</strong>. Join us on this journey
+                            to make style more meaningful.”
+                        </span>
+                        <i class="fas fa-quote-right"></i>
+                    </blockquote>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Us Section -->
+    <section id="contact" class="contact-section contact-dark">
+        <div class="container">
+            <div class="section-header">
+                <h2>Contact Us</h2>
+                <p>We'd love to hear from you! Fill out the form below and our team will get back to you soon.</p>
+            </div>
+            <div class="contact-flex">
+                <form class="contact-form" action="mailto:studiov.support@gmail.com" method="POST" enctype="text/plain">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="contactName">Name</label>
+                            <input type="text" id="contactName" name="Name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="contactEmail">Email</label>
+                            <input type="email" id="contactEmail" name="Email" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="contactSubject">Subject</label>
+                        <input type="text" id="contactSubject" name="Subject" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="contactMessage">Message</label>
+                        <textarea id="contactMessage" name="Message" rows="5" required></textarea>
+                    </div>
+                    <button type="submit" class="btn-primary" style="width:100%;">Send Message</button>
+                </form>
+                <div class="contact-info-block">
+                    <div class="contact-info">
+                        <p><i class="fas fa-map-marker-alt"></i> Bulacan, Philippines</p>
+                        <p><i class="fas fa-phone"></i> <a href="tel:+639935596199">+63 (993) 559-6199</a></p>
+                        <p><i class="fas fa-envelope"></i> <a href="mailto:studiov.support@gmail.com">studiov.support@gmail.com</a></p>
+                    </div>
+                    <div class="contact-social">
+                        <a href="https://instagram.com/studiov" class="social-btn instagram" target="_blank"><i class="fab fa-instagram"></i> Instagram</a>
+                        <a href="https://facebook.com/studiov" class="social-btn facebook" target="_blank"><i class="fab fa-facebook-f"></i> Facebook</a>
+                        <a href="https://tiktok.com/@studiov" class="social-btn tiktok" target="_blank"><i class="fab fa-tiktok"></i> TikTok</a>
+                        <a href="https://studiov.com" class="social-btn website" target="_blank"><i class="fas fa-globe"></i> Website</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <span>&copy; 2025 Studio V. All rights reserved.</span>
+        </div>
+    </footer>
+
+    <!-- Loading Spinner -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div class="toast" id="toast">
+        <div class="toast-content">
+            <i class="fas fa-check-circle"></i>
+            <span class="toast-message">Success!</span>
+        </div>
+        <button class="toast-close" onclick="hideToast()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
+    <!-- Product Card Template -->
+    <div id="productCardTemplate" style="display:none;">
+        <div class="product-card">
+            <div class="product-image">
+                <img src="" alt="" />
+            </div>
+            <div class="product-info">
+                <h3 class="product-name"></h3>
+                <p class="product-category"></p>
+                <div class="product-rating"></div>
+                <div class="product-price"></div>
+                <div class="product-sizes"></div>
+                <div class="product-overlay product-actions-bottom">
+                    <button class="btn-primary add-to-cart-btn">
+                        <i class="fas fa-shopping-cart"></i> Add to Cart
+                    </button>
+                    <button class="btn-outline quick-view-btn">
+                        <i class="fas fa-eye"></i> Quick View
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.7.1/firebase-app-compat.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.7.1/firebase-auth-compat.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.7.1/firebase-firestore-compat.min.js"></script>
+    <script src="firebase.js"></script>
+    <script src="scripts/main.js"></script>
+</body>
+
+</html>

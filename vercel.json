@@ -1,0 +1,20 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "public/**/*",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/public/$1"
+    }
+  ],
+  "env": {
+    "FIREBASE_API_KEY": "AIzaSyBXsbxQ-uDmULoJNyvI-KJ6ODRngXUvy-s",
+    "FIREBASE_AUTH_DOMAIN": "nline-shop-pos-cf4f8.firebaseapp.com",
+    "FIREBASE_PROJECT_ID": "online-shop-pos-cf4f8"
+  }
+}
