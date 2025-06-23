@@ -1,4 +1,3 @@
-
 // Firebase Configuration for Studio V
 // Firebase SDK Configuration
 const firebaseConfig = {  

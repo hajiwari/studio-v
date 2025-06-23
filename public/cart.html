@@ -14,35 +14,40 @@
     <!-- Navigation -->
     <nav class="navbar">
         <div class="nav-container">
+            <div class="hamburger" onclick="toggleMobileMenu()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
             <div class="nav-logo">
-                <h2>Studio V</h2>
+                <a href="index.html#landing" style="text-decoration:none; color:inherit;">
+                    <h2>Studio V</h2>
+                </a>
             </div>
             <div class="nav-menu">
-                <a href="index.html#home" class="nav-link">Home</a>
+                <a href="index.html#landing" class="nav-link">Home</a>
                 <a href="index.html#products" class="nav-link">Products</a>
                 <a href="index.html#about" class="nav-link">About</a>
                 <a href="index.html#contact" class="nav-link">Contact Us</a>
             </div>
             <div class="nav-actions">
                 <button class="cart-btn" onclick="window.location.href='cart.html'">
-                    <i class="fas fa-shopping-cart"></i>
-                    <span class="cart-count">0</span>
+                    <span class="cart-icon-wrapper">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span class="cart-count"></span>
+                    </span>
                 </button>
                 <button class="auth-btn" onclick="showAuthModal()">
-                    <i class="fas fa-user"></i>
+                    <i class="fas fa-user" id="userIcon"></i>
                     <span class="auth-text">Sign In</span>
                 </button>
             </div>
-            <div class="hamburger" onclick="toggleMobileMenu()">
-                <span></span>
-                <span></span>
-                <span></span>
-            </div>
+
         </div>
     </nav>
 
     <!-- Cart Page -->
-    <section id="cart" class="cart-section" style="margin-top: 90px;">
+    <section id="cart" class="cart-section" style="margin-top: 90px; background: #f6f7fa;">
         <div class="container">
             <h2>Your Shopping Cart</h2>
             <div class="cart-items" id="cartItems">
@@ -186,7 +191,7 @@
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body account-modal">
                 <div class="account-tabs">
                     <button class="tab-btn active" onclick="showTab('profile')">Profile</button>
                     <button class="tab-btn" onclick="showTab('orders')">Orders</button>
@@ -194,23 +199,35 @@
                     <button class="tab-btn" onclick="showTab('delivery')">Delivery Options</button>
                 </div>
 
+
                 <div class="tab-content">
                     <div class="tab-pane active" id="profile">
-                        <form id="profileForm">
-                            <div class="form-group">
-                                <label for="profileName">Full Name</label>
-                                <input type="text" id="profileName">
-                            </div>
-                            <div class="form-group">
-                                <label for="profileEmail">Email</label>
-                                <input type="email" id="profileEmail" disabled>
-                            </div>
-                            <div class="form-group">
-                                <label for="profilePhone">Phone</label>
-                                <input type="tel" id="profilePhone">
-                            </div>
-                            <button type="submit" class="btn-primary">Update Profile</button>
-                        </form>
+                        <div class="profile-card">
+                            <h3 class="profile-title"><i class="fas fa-user-circle"></i> Profile Information</h3>
+                            <form id="profileForm">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="profileName">Full Name</label>
+                                        <input type="text" id="profileName" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="profileEmail">Email</label>
+                                        <input type="email" id="profileEmail" disabled>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="profilePhone">Phone</label>
+                                    <input type="tel" id="profilePhone" placeholder="e.g. 09XXXXXXXXX">
+                                </div>
+                                <div class="buttons-account-settings">
+                                    <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Update
+                                        Profile</button>
+                                    <button type="button" class="logout-btn" onclick="logoutUser()">
+                                        <i class="fas fa-sign-out-alt"></i> Logout
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
 
                     <div class="tab-pane" id="orders">
@@ -227,22 +244,38 @@
                     </div>
 
                     <div class="tab-pane" id="delivery">
-                        <div class="delivery-options">
+                        <div class="delivery-options-card">
+                            <h3 class="delivery-title"><i class="fas fa-truck"></i> Delivery Preferences</h3>
                             <div class="option-group">
-                                <h4>Preferred Delivery Time</h4>
-                                <label><input type="radio" name="deliveryTime" value="morning"> Morning (9AM -
-                                    12PM)</label>
-                                <label><input type="radio" name="deliveryTime" value="afternoon"> Afternoon (12PM -
-                                    6PM)</label>
-                                <label><input type="radio" name="deliveryTime" value="evening"> Evening (6PM -
-                                    9PM)</label>
+                                <label class="option-label">Preferred Delivery Time</label>
+                                <div class="delivery-radio-group">
+                                    <label class="radio-label">
+                                        <input type="radio" name="deliveryTime" value="morning">
+                                        <span class="custom-radio"></span>
+                                        Morning <span class="time-range">(9AM - 12PM)</span>
+                                    </label>
+                                    <label class="radio-label">
+                                        <input type="radio" name="deliveryTime" value="afternoon">
+                                        <span class="custom-radio"></span>
+                                        Afternoon <span class="time-range">(12PM - 6PM)</span>
+                                    </label>
+                                    <label class="radio-label">
+                                        <input type="radio" name="deliveryTime" value="evening">
+                                        <span class="custom-radio"></span>
+                                        Evening <span class="time-range">(6PM - 9PM)</span>
+                                    </label>
+                                </div>
                             </div>
                             <div class="option-group">
-                                <h4>Delivery Instructions</h4>
+                                <label for="deliveryInstructions" class="option-label">Delivery Instructions</label>
                                 <textarea id="deliveryInstructions"
                                     placeholder="Special delivery instructions..."></textarea>
                             </div>
-                            <button class="btn-primary" onclick="saveDeliveryOptions()">Save Preferences</button>
+                            <div class="delivery-actions">
+                                <button class="btn-primary" onclick="saveDeliveryOptions()">
+                                    <i class="fas fa-save"></i> Save Preferences
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

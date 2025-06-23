@@ -1,6 +1,6 @@
-# StylePOS - Clothing Point of Sale System
+# Style V - Clothing Point of Sale System
 
-A modern, responsive Point of Sale system for clothing stores built with HTML, CSS, JavaScript, and Firebase.
+A modern, responsive web system for clothing stores built with HTML, CSS, JavaScript, and Firebase.
 
 ## Features
 
@@ -9,13 +9,12 @@ A modern, responsive Point of Sale system for clothing stores built with HTML, C
 - 🛒 Shopping Cart Management
 - 💳 Checkout Process
 - 👥 User Account Management
-- 📊 Sales Dashboard
 - 📱 Responsive Design
 - 🔥 Firebase Integration
 
 ## Tech Stack
 
-- **Frontend**: HTML5, CSS3, JavaScript (ES6+), Tailwind CSS
+- **Frontend**: HTML5, CSS3, JavaScript (ES6+)
 - **Backend**: Firebase (Authentication, Firestore)
 - **Hosting**: Vercel
 - **Version Control**: Git/GitHub
@@ -65,7 +64,7 @@ clothing-pos-system/
 │   ├── style.css
 │   ├── firebase.js         # Firebase configuration and services
 │   ├── assets/
-│   │   └── images/         # Product images
+│   ├── images/             # Product images
 │   └── scripts/
 │       └── main.js         # Main application logic
 ├── package.json            # Dependencies and scripts

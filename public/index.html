@@ -14,30 +14,35 @@
     <!-- Navigation -->
     <nav class="navbar">
         <div class="nav-container">
-            <div class="nav-logo">
-                <h2>Studio V</h2>
-            </div>
-            <div class="nav-menu">
-                <a href="#home" class="nav-link">Home</a>
-                <a href="#products" class="nav-link">Products</a>
-                <a href="#about" class="nav-link">About</a>
-                <a href="#contact" class="nav-link">Contact Us</a>
-            </div>
-            <div class="nav-actions">
-                <button class="cart-btn" onclick="window.location.href='cart.html'">
-                    <i class="fas fa-shopping-cart"></i>
-                    <span class="cart-count">0</span>
-                </button>
-                <button class="auth-btn" onclick="showAuthModal()">
-                    <i class="fas fa-user"></i>
-                    <span class="auth-text">Sign In</span>
-                </button>
-            </div>
             <div class="hamburger" onclick="toggleMobileMenu()">
                 <span></span>
                 <span></span>
                 <span></span>
             </div>
+            <div class="nav-logo">
+                <a href="#landing" style="text-decoration:none; color:inherit;">
+                    <h2>Studio V</h2>
+                </a>
+            </div>
+            <div class="nav-menu">
+                <a class="nav-link" onclick="scrollToLanding()">Home</a>
+                <a class="nav-link" onclick="scrollToProducts()">Products</a>
+                <a class="nav-link" onclick="scrollToAbout()">About</a>
+                <a class="nav-link" onclick="scrollToContact()">Contact Us</a>
+            </div>
+            <div class="nav-actions">
+                <button class="cart-btn" onclick="window.location.href='cart.html'">
+                    <span class="cart-icon-wrapper">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span class="cart-count"></span>
+                    </span>
+                </button>
+                <button class="auth-btn" onclick="showAuthModal()">
+                    <i class="fas fa-user" id="userIcon"></i>
+                    <span class="auth-text">Sign In</span>
+                </button>
+            </div>
+
         </div>
     </nav>
 
@@ -54,8 +59,61 @@
                 <h1 class="hero-title">Studio V</h1>
                 <p class="hero-subtitle">Discover premium clothing that defines your style</p>
                 <div class="hero-buttons">
-                    <button class="btn-primary" onclick="showAuthModal()">Get Started</button>
+                    <button class="btn-primary" id="getStartedBtn" onclick="showAuthModal()">Get Started</button>
                     <button class="btn-secondary" onclick="scrollToProducts()">See Products</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Brand Slider Section -->
+    <section class="brand-slider-section">
+        <div class="brand-slider-container">
+            <div class="brand-slider-track">
+                <!-- Repeat for seamless effect -->
+                <div class="brand-slide">
+                    <img src="https://shop.bench.com.ph/media/codazon_cache/brand/500x450/wysiwyg/bench-logo-black.png"
+                        alt="BENCH" />
+                </div>
+                <div class="brand-slide">
+                    <img src="https://static.wikia.nocookie.net/logopedia/images/e/ee/Penshoppe_2003_wordmark.svg"
+                        alt="Penshoppe" />
+                </div>
+                <div class="brand-slide">
+                    <img src="https://www.kamiseta.com/cdn/shop/files/KC_Logo-02_300x.png?v=1614356224"
+                        alt="Kamiseta" />
+                </div>
+                <div class="brand-slide">
+                    <img style="height: 90px !important;"
+                        src="https://bayo.com.ph/wp-content/uploads/2024/07/viber_image_2024-07-12_17-16-12-044-150x150.png"
+                        alt="Bayo" />
+                </div>
+                <div class="brand-slide">
+                    <img src="https://www.regattalifestyle.com/cdn/shop/files/New_Regatta_Logo_transparent_50af9141-344e-41cd-aa37-3427ef73d335_200x.png?v=1667749406"
+                        alt="Regatta" />
+                </div>
+
+                <!-- Repeat for seamless scroll -->
+                <div class="brand-slide">
+                    <img src="https://shop.bench.com.ph/media/codazon_cache/brand/500x450/wysiwyg/bench-logo-black.png"
+                        alt="BENCH" />
+                </div>
+                <div class="brand-slide">
+                    <img src="https://static.wikia.nocookie.net/logopedia/images/e/ee/Penshoppe_2003_wordmark.svg"
+                        alt="Penshoppe" />
+                </div>
+                <div class="brand-slide">
+                    <img src="https://www.kamiseta.com/cdn/shop/files/KC_Logo-02_300x.png?v=1614356224"
+                        alt="Kamiseta" />
+                </div>
+                <div class="brand-slide" style="width: 10px;">
+                    <img style="height: 90px !important;"
+                        src="https://bayo.com.ph/wp-content/uploads/2024/07/viber_image_2024-07-12_17-16-12-044-150x150.png"
+                        alt="Bayo" />
+                </div>
+                <div class="brand-slide">
+                    <img src="https://www.regattalifestyle.com/cdn/shop/files/New_Regatta_Logo_transparent_50af9141-344e-41cd-aa37-3427ef73d335_200x.png?v=1667749406"
+                        alt="Regatta" />
                 </div>
             </div>
         </div>
@@ -82,7 +140,7 @@
         </div>
     </section>
 
-    <!-- Cart Sidebar -->
+    <!-- Cart Sidebar
     <div class="cart-sidebar" id="cartSidebar">
         <div class="cart-header">
             <h3>Shopping Cart</h3>
@@ -91,7 +149,7 @@
             </button>
         </div>
         <div class="cart-items" id="cartItems">
-            <!-- Cart items will be dynamically loaded -->
+            // Cart items will be dynamically loaded
         </div>
         <div class="cart-empty" id="emptyCart" style="display: none;">
             <i class="fas fa-shopping-cart"></i>
@@ -105,7 +163,7 @@
                 Proceed to Checkout
             </button>
         </div>
-    </div>
+    </div> -->
 
     <!-- Auth Modal -->
     <div class="modal-overlay" id="authModal">
@@ -230,33 +288,45 @@
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body account-modal">
                 <div class="account-tabs">
                     <button class="tab-btn active" onclick="showTab('profile')">Profile</button>
                     <button class="tab-btn" onclick="showTab('orders')">Orders</button>
                     <button class="tab-btn" onclick="showTab('addresses')">Addresses</button>
                     <button class="tab-btn" onclick="showTab('delivery')">Delivery Options</button>
+
                 </div>
+
 
                 <div class="tab-content">
                     <div class="tab-pane active" id="profile">
-                        <form id="profileForm">
-                            <div class="form-group">
-                                <label for="profileName">Full Name</label>
-                                <input type="text" id="profileName">
-                            </div>
-                            <div class="form-group">
-                                <label for="profileEmail">Email</label>
-                                <input type="email" id="profileEmail" disabled>
-                            </div>
-                            <div class="form-group">
-                                <label for="profilePhone">Phone</label>
-                                <input type="tel" id="profilePhone">
-                            </div>
-                            <button type="submit" class="btn-primary">Update Profile</button>
-                        </form>
+                        <div class="profile-card">
+                            <h3 class="profile-title"><i class="fas fa-user-circle"></i> Profile Information</h3>
+                            <form id="profileForm">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="profileName">Full Name</label>
+                                        <input type="text" id="profileName" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="profileEmail">Email</label>
+                                        <input type="email" id="profileEmail" disabled>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="profilePhone">Phone</label>
+                                    <input type="tel" id="profilePhone" placeholder="e.g. 09XXXXXXXXX">
+                                </div>
+                                <div class="buttons-account-settings">
+                                    <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Update
+                                        Profile</button>
+                                    <button type="button" class="logout-btn" onclick="logoutUser()">
+                                        <i class="fas fa-sign-out-alt"></i> Logout
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
-
                     <div class="tab-pane" id="orders">
                         <div class="orders-list" id="ordersList">
                             <!-- Orders will be populated here -->
@@ -271,22 +341,38 @@
                     </div>
 
                     <div class="tab-pane" id="delivery">
-                        <div class="delivery-options">
+                        <div class="delivery-options-card">
+                            <h3 class="delivery-title"><i class="fas fa-truck"></i> Delivery Preferences</h3>
                             <div class="option-group">
-                                <h4>Preferred Delivery Time</h4>
-                                <label><input type="radio" name="deliveryTime" value="morning"> Morning (9AM -
-                                    12PM)</label>
-                                <label><input type="radio" name="deliveryTime" value="afternoon"> Afternoon (12PM -
-                                    6PM)</label>
-                                <label><input type="radio" name="deliveryTime" value="evening"> Evening (6PM -
-                                    9PM)</label>
+                                <label class="option-label">Preferred Delivery Time</label>
+                                <div class="delivery-radio-group">
+                                    <label class="radio-label">
+                                        <input type="radio" name="deliveryTime" value="morning">
+                                        <span class="custom-radio"></span>
+                                        Morning <span class="time-range">(9AM - 12PM)</span>
+                                    </label>
+                                    <label class="radio-label">
+                                        <input type="radio" name="deliveryTime" value="afternoon">
+                                        <span class="custom-radio"></span>
+                                        Afternoon <span class="time-range">(12PM - 6PM)</span>
+                                    </label>
+                                    <label class="radio-label">
+                                        <input type="radio" name="deliveryTime" value="evening">
+                                        <span class="custom-radio"></span>
+                                        Evening <span class="time-range">(6PM - 9PM)</span>
+                                    </label>
+                                </div>
                             </div>
                             <div class="option-group">
-                                <h4>Delivery Instructions</h4>
+                                <label for="deliveryInstructions" class="option-label">Delivery Instructions</label>
                                 <textarea id="deliveryInstructions"
                                     placeholder="Special delivery instructions..."></textarea>
                             </div>
-                            <button class="btn-primary" onclick="saveDeliveryOptions()">Save Preferences</button>
+                            <div class="delivery-actions">
+                                <button class="btn-primary" onclick="saveDeliveryOptions()">
+                                    <i class="fas fa-save"></i> Save Preferences
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -352,7 +438,8 @@
                             and <span class="about-keyword">comfort</span>.</li>
                         <li>To create clothing and accessories that are <span class="about-keyword">stylish</span>,
                             <span class="about-keyword">soulful</span>, and <span class="about-keyword">responsibly
-                                made</span>.</li>
+                                made</span>.
+                        </li>
                         <li>To make style more <span class="about-keyword">personal</span>, <span
                                 class="about-keyword">responsible</span>, and <span
                                 class="about-keyword">inspiring</span>.</li>
@@ -405,14 +492,19 @@
                 <div class="contact-info-block">
                     <div class="contact-info">
                         <p><i class="fas fa-map-marker-alt"></i> Bulacan, Philippines</p>
-                        <p><i class="fas fa-phone"></i> <a href="tel:+639935596199">+63 (993) 559-6199</a></p>
-                        <p><i class="fas fa-envelope"></i> <a href="mailto:studiov.support@gmail.com">studiov.support@gmail.com</a></p>
+                        <p><i class="fas fa-phone"></i> <a href="tel:+639935596199">+63 (993)559-6199</a></p>
+                        <p><i class="fas fa-envelope"></i> <a
+                                href="mailto:studiov.support@gmail.com">studiov.support@gmail.com</a></p>
                     </div>
                     <div class="contact-social">
-                        <a href="https://instagram.com/studiov" class="social-btn instagram" target="_blank"><i class="fab fa-instagram"></i> Instagram</a>
-                        <a href="https://facebook.com/studiov" class="social-btn facebook" target="_blank"><i class="fab fa-facebook-f"></i> Facebook</a>
-                        <a href="https://tiktok.com/@studiov" class="social-btn tiktok" target="_blank"><i class="fab fa-tiktok"></i> TikTok</a>
-                        <a href="https://studiov.com" class="social-btn website" target="_blank"><i class="fas fa-globe"></i> Website</a>
+                        <a href="https://instagram.com/studiov" class="social-btn instagram" target="_blank"><i
+                                class="fab fa-instagram"></i> Instagram</a>
+                        <a href="https://facebook.com/studiov" class="social-btn facebook" target="_blank"><i
+                                class="fab fa-facebook-f"></i> Facebook</a>
+                        <a href="https://tiktok.com/@studiov" class="social-btn tiktok" target="_blank"><i
+                                class="fab fa-tiktok"></i> TikTok</a>
+                        <a href="https://studiov.com" class="social-btn website" target="_blank"><i
+                                class="fas fa-globe"></i> Website</a>
                     </div>
                 </div>
             </div>
@@ -432,36 +524,35 @@
     </div>
 
     <!-- Notification Toast -->
-    <div class="toast" id="toast">
+    <!-- <div class="toast" id="toast">
         <div class="toast-content">
             <i class="fas fa-check-circle"></i>
             <span class="toast-message">Success!</span>
+            <button class="toast-close" onclick="hideToast()" aria-label="Close">
+                <i class="fas fa-times"></i>
+            </button>
         </div>
-        <button class="toast-close" onclick="hideToast()">
-            <i class="fas fa-times"></i>
-        </button>
-    </div>
+        <div class="toast-timer-bar">
+            <div class="toast-timer-bar-inner" id="toastTimerBar"></div>
+        </div>
+    </div> -->
 
     <!-- Product Card Template -->
     <div id="productCardTemplate" style="display:none;">
-        <div class="product-card">
+        <div class="product product-card">
             <div class="product-image">
                 <img src="" alt="" />
             </div>
             <div class="product-info">
+                <button class="icon-cart-btn add-to-cart-btn" title="Add to Cart">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span class="cart-click-effect"></span>
+                </button>
                 <h3 class="product-name"></h3>
                 <p class="product-category"></p>
                 <div class="product-rating"></div>
                 <div class="product-price"></div>
-                <div class="product-sizes"></div>
-                <div class="product-overlay product-actions-bottom">
-                    <button class="btn-primary add-to-cart-btn">
-                        <i class="fas fa-shopping-cart"></i> Add to Cart
-                    </button>
-                    <button class="btn-outline quick-view-btn">
-                        <i class="fas fa-eye"></i> Quick View
-                    </button>
-                </div>
+                <div class="cart-item-variation product-sizes"></div>
             </div>
         </div>
     </div>
