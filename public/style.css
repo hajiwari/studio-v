@@ -1672,10 +1672,10 @@ h6 {
 /* Responsive */
 @media (max-width: 700px) {
     .cart-item-card {
-        flex-direction: column;
-        align-items: flex-start;
+        flex-direction: row;
+        display: flex;
         gap: 14px;
-        padding: 18px 10px;
+        flex-wrap: wrap;
     }
 
     .cart-item-actions {
@@ -1686,6 +1686,11 @@ h6 {
 
     .cart-item-price {
         min-width: 0;
+    }
+
+    .checkout-container {
+        display: flex;
+        flex-direction: column;
     }
 }
 
@@ -1914,7 +1919,6 @@ h6 {
     }
 }
 
-/* Brand Slider Section */
 /* Brand Slider Section */
 .brand-slider-section {
     background: #fff;
@@ -2238,14 +2242,12 @@ h6 {
     padding: 0px 32px 28px 0px;
     display: flex;
     flex-direction: column;
-    gap: 28px;
 }
 
 .profile-title {
     font-size: 1.35rem;
     color: #764ba2;
     font-weight: 700;
-    margin-bottom: 10px;
     display: flex;
     align-items: center;
     gap: 10px;

@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Your Cart - Studio V</title>
+    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/7799/7799212.png" />
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -15,7 +16,7 @@
     <!-- Navigation -->
     <nav class="navbar">
         <div class="nav-container">
-            <div class="hamburger" onclick="toggleMobileMenu()">
+            <div class="hamburger">
                 <span></span>
                 <span></span>
                 <span></span>
@@ -39,7 +40,7 @@
                     </span>
                 </button>
                 <button class="auth-btn" onclick="showAuthModal()">
-                    <!-- <i class="fas fa-user" id="userIcon"></i> -->
+                    <i class="fas fa-user" id="userIcon" style="display:none;"></i>
                     <span class="auth-text">Sign In</span>
                 </button>
             </div>
@@ -200,6 +201,7 @@
                     <button class="tab-btn" onclick="showTab('orders')">Orders</button>
                     <button class="tab-btn" onclick="showTab('addresses')">Addresses</button>
                     <button class="tab-btn" onclick="showTab('delivery')">Delivery Options</button>
+
                 </div>
 
 
@@ -238,24 +240,26 @@
                             </form>
                         </div>
                     </div>
-
                     <div class="tab-pane" id="orders">
+                        <h3 class="profile-title"><i class="fas fa-shopping-cart"></i> Order List</h3>
                         <div class="orders-list" id="ordersList">
                             <!-- Orders will be populated here -->
                         </div>
                     </div>
 
                     <div class="tab-pane" id="addresses">
+                        <h3 class="profile-title"><i class="fas fa-map-pin"></i> Address Information</h3>
                         <div class="addresses-list" id="addressesList">
                             <!-- Addresses will be populated here -->
                         </div>
-                        <button class="btn-outline" onclick="addNewAddress()">Add New Address</button>
+                        <button class="btn-primary btn-outline" onclick="addNewAddress()">Add New Address</button>
                     </div>
+
 
                     <div class="tab-pane" id="delivery">
                         <div class="delivery-options-card">
                             <h3 class="delivery-title"><i class="fas fa-truck"></i> Delivery Preferences</h3>
-                            <div class="option-group">
+                            <div class="option-group" style="padding: 20px 0px 20px 0px">
                                 <label class="option-label">Preferred Delivery Time</label>
                                 <div class="delivery-radio-group">
                                     <label class="radio-label">

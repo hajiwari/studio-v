@@ -5,11 +5,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Studio V</title>
+    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/7799/7799212.png" />
     <link rel="stylesheet" href="style.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-    
+
 </head>
 
 <body>
@@ -165,7 +166,8 @@
                         <label for="fullName">Full Name</label>
                         <input type="text" id="fullName">
                     </div>
-                    <button type="submit" class="btn-primary" id="authSubmit" style="margin-left: auto !important; margin-right: auto !important;">Sign In</button>
+                    <button type="submit" class="btn-primary" id="authSubmit"
+                        style="margin-left: auto !important; margin-right: auto !important;">Sign In</button>
                 </form>
                 <div class="auth-switch">
                     <p id="authSwitchText">Don't have an account?
@@ -311,23 +313,25 @@
                         </div>
                     </div>
                     <div class="tab-pane" id="orders">
+                        <h3 class="profile-title"><i class="fas fa-shopping-cart"></i> Order List</h3>
                         <div class="orders-list" id="ordersList">
                             <!-- Orders will be populated here -->
                         </div>
                     </div>
 
                     <div class="tab-pane" id="addresses">
+                        <h3 class="profile-title"><i class="fas fa-map-pin"></i> Address Information</h3>
                         <div class="addresses-list" id="addressesList">
                             <!-- Addresses will be populated here -->
                         </div>
-                        <button class="btn-outline" onclick="addNewAddress()">Add New Address</button>
+                        <button class="btn-primary btn-outline" onclick="addNewAddress()">Add New Address</button>
                     </div>
 
 
                     <div class="tab-pane" id="delivery">
                         <div class="delivery-options-card">
                             <h3 class="delivery-title"><i class="fas fa-truck"></i> Delivery Preferences</h3>
-                            <div class="option-group">
+                            <div class="option-group" style="padding: 20px 0px 20px 0px">
                                 <label class="option-label">Preferred Delivery Time</label>
                                 <div class="delivery-radio-group">
                                     <label class="radio-label">
