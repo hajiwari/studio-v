@@ -131,6 +131,17 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         };
     }
+    if (window.location.pathname.endsWith('cart.html')) {
+        const loader = document.getElementById('cartPageLoader');
+        const cartSection = document.getElementById('cart');
+        if (loader && cartSection) {
+            cartSection.style.display = 'none';
+            setTimeout(() => {
+                loader.style.display = 'none';
+                cartSection.style.display = '';
+            }, 2500);
+        }
+    }
 });
 
 // Update Auth UI based on user state
@@ -247,6 +258,17 @@ function setupEventListeners() {
     if (hamburger) {
         hamburger.addEventListener('click', toggleMobileMenu);
     }
+
+    // Hide mobile menu when a nav-link is clicked (on mobile)
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', function () {
+            const navbar = document.querySelector('.navbar');
+            if (window.innerWidth <= 900 && navbar && navbar.classList.contains('mobile-active')) {
+                navbar.classList.remove('mobile-active');
+                document.removeEventListener('mousedown', closeMenuOnClickOutside);
+            }
+        });
+    });
 
     // Form submissions
     const authForm = document.getElementById('authForm');
@@ -975,31 +997,31 @@ async function signInUser(email, password) {
     }
 }
 
-async function signInWithGoogle() {
-    try {
-        if (window.firebase && window.firebase.auth) {
-            const provider = new window.firebase.auth.GoogleAuthProvider();
-            await window.firebase.auth().signInWithPopup(provider);
-            showToast('Signed in with Google!', 'success');
-            hideAuthModal();
-        }
-    } catch (error) {
-        showToast(error.message, 'error');
-    }
-}
+// async function signInWithGoogle() {
+//     try {
+//         if (window.firebase && window.firebase.auth) {
+//             const provider = new window.firebase.auth.GoogleAuthProvider();
+//             await window.firebase.auth().signInWithPopup(provider);
+//             showToast('Signed in with Google!', 'success');
+//             hideAuthModal();
+//         }
+//     } catch (error) {
+//         showToast(error.message, 'error');
+//     }
+// }
 
-async function signInWithGitHub() {
-    try {
-        if (window.firebase && window.firebase.auth) {
-            const provider = new window.firebase.auth.GithubAuthProvider();
-            await window.firebase.auth().signInWithPopup(provider);
-            showToast('Signed in with GitHub!', 'success');
-            hideAuthModal();
-        }
-    } catch (error) {
-        showToast(error.message, 'error');
-    }
-}
+// async function signInWithGitHub() {
+//     try {
+//         if (window.firebase && window.firebase.auth) {
+//             const provider = new window.firebase.auth.GithubAuthProvider();
+//             await window.firebase.auth().signInWithPopup(provider);
+//             showToast('Signed in with GitHub!', 'success');
+//             hideAuthModal();
+//         }
+//     } catch (error) {
+//         showToast(error.message, 'error');
+//     }
+// }
 
 async function signOut() {
     try {
@@ -1016,19 +1038,19 @@ function updateAuthUI(isSignedIn) {
     const authBtn = document.querySelector('.auth-btn');
     const authText = document.querySelector('.auth-text');
     const getStartedBtn = document.getElementById('getStartedBtn');
-    const userIcon = document.getElementById('userIcon');
+    // const userIcon = document.getElementById('userIcon');
 
     if (authBtn && authText) {
         if (isSignedIn) {
             authText.textContent = AppState.user?.displayName || 'Account';
             authBtn.onclick = showAccountModal;
             if (getStartedBtn) getStartedBtn.style.display = 'none';
-            if (userIcon) userIcon.style.display = 'none';
+            // if (userIcon) userIcon.style.display = 'none';
         } else {
             authText.textContent = 'Sign In';
             authBtn.onclick = showAuthModal;
             if (getStartedBtn) getStartedBtn.style.display = '';
-            if (userIcon) userIcon.style.display = '';
+            // if (userIcon) userIcon.style.display = '';
             // Scroll to top/landing when logged out
             const landing = document.getElementById('landing');
             if (landing) {

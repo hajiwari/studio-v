@@ -117,44 +117,44 @@ class AuthService {
     }
   }
 
-  // Sign in with Google
-  async signInWithGoogle() {
-    try {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      provider.addScope('email');
-      provider.addScope('profile');
+  //  // Sign in with Google
+  // async signInWithGoogle() {
+  //   try {
+  //     const provider = new firebase.auth.GoogleAuthProvider();
+  //     provider.addScope('email');
+  //     provider.addScope('profile');
 
-      const result = await auth.signInWithPopup(provider);
-      const user = result.user;
+  //     const result = await auth.signInWithPopup(provider);
+  //     const user = result.user;
 
-      // Create or update user document
-      await this.createUserDocument(user);
+  //     // Create or update user document
+  //     await this.createUserDocument(user);
 
-      return { success: true, user };
-    } catch (error) {
-      console.error('Google sign in error:', error);
-      return { success: false, error: error.message };
-    }
-  }
+  //     return { success: true, user };
+  //   } catch (error) {
+  //     console.error('Google sign in error:', error);
+  //     return { success: false, error: error.message };
+  //   }
+  // }
 
-  // Sign in with GitHub
-  async signInWithGitHub() {
-    try {
-      const provider = new firebase.auth.GithubAuthProvider();
-      provider.addScope('user:email');
+  // // Sign in with GitHub
+  // async signInWithGitHub() {
+  //   try {
+  //     const provider = new firebase.auth.GithubAuthProvider();
+  //     provider.addScope('user:email');
 
-      const result = await auth.signInWithPopup(provider);
-      const user = result.user;
+  //     const result = await auth.signInWithPopup(provider);
+  //     const user = result.user;
 
-      // Create or update user document
-      await this.createUserDocument(user);
+  //     // Create or update user document
+  //     await this.createUserDocument(user);
 
-      return { success: true, user };
-    } catch (error) {
-      console.error('GitHub sign in error:', error);
-      return { success: false, error: error.message };
-    }
-  }
+  //     return { success: true, user };
+  //   } catch (error) {
+  //     console.error('GitHub sign in error:', error);
+  //     return { success: false, error: error.message };
+  //   }
+  // }
 
   // Sign out
   async signOut() {

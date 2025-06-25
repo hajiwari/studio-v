@@ -16,7 +16,7 @@
     <!-- Navigation -->
     <nav class="navbar">
         <div class="nav-container">
-            <div class="hamburger" onclick="toggleMobileMenu()">
+            <div class="hamburger">
                 <span></span>
                 <span></span>
                 <span></span>
@@ -40,7 +40,7 @@
                     </span>
                 </button>
                 <button class="auth-btn" onclick="showAuthModal()">
-                    <i class="fas fa-user" id="userIcon"></i>
+                    <i class="fas fa-user" id="userIcon" style="display:none;"></i>
                     <span class="auth-text">Sign In</span>
                 </button>
             </div>
@@ -165,21 +165,21 @@
                         <label for="fullName">Full Name</label>
                         <input type="text" id="fullName">
                     </div>
-                    <button type="submit" class="btn-primary" id="authSubmit">Sign In</button>
+                    <button type="submit" class="btn-primary" id="authSubmit" style="margin-left: auto !important; margin-right: auto !important;">Sign In</button>
                 </form>
                 <div class="auth-switch">
                     <p id="authSwitchText">Don't have an account?
                         <span class="auth-link" onclick="toggleAuthMode()">Sign Up</span>
                     </p>
                 </div>
-                <div class="social-auth">
+                <!-- <div class="social-auth">
                     <button class="btn-google" onclick="signInWithGoogle()">
                         <i class="fab fa-google"></i> Continue with Google
                     </button>
                     <button class="btn-github" onclick="signInWithGitHub()">
                         <i class="fab fa-github"></i> Continue with GitHub
                     </button>
-                </div>
+                </div> -->
             </div>
         </div>
     </div>

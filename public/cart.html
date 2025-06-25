@@ -39,13 +39,17 @@
                     </span>
                 </button>
                 <button class="auth-btn" onclick="showAuthModal()">
-                    <i class="fas fa-user" id="userIcon"></i>
+                    <!-- <i class="fas fa-user" id="userIcon"></i> -->
                     <span class="auth-text">Sign In</span>
                 </button>
             </div>
 
         </div>
     </nav>
+
+    <div id="cartPageLoader" style="display:flex;justify-content:center;align-items:center;padding:90px 0;">
+        <div class="spinner" style="width:48px;height:48px;border-width:5px;"></div>
+    </div>
 
     <!-- Cart Page -->
     <section id="cart" class="cart-section" style="margin-top: 90px; background: #f6f7fa;">
@@ -92,21 +96,22 @@
                         <label for="fullName">Full Name</label>
                         <input type="text" id="fullName">
                     </div>
-                    <button type="submit" class="btn-primary" id="authSubmit">Sign In</button>
+                    <button type="submit" class="btn-primary" id="authSubmit"
+                        style="margin-left: auto !important; margin-right: auto !important;">Sign In</button>
                 </form>
                 <div class="auth-switch">
                     <p id="authSwitchText">Don't have an account?
                         <span class="auth-link" onclick="toggleAuthMode()">Sign Up</span>
                     </p>
                 </div>
-                <div class="social-auth">
+                <!-- <div class="social-auth">
                     <button class="btn-google" onclick="signInWithGoogle()">
                         <i class="fab fa-google"></i> Continue with Google
                     </button>
                     <button class="btn-github" onclick="signInWithGitHub()">
                         <i class="fab fa-github"></i> Continue with GitHub
                     </button>
-                </div>
+                </div> -->
             </div>
         </div>
     </div>
@@ -302,6 +307,7 @@
             <i class="fas fa-times"></i>
         </button>
     </div>
+
 
     <!-- Scripts -->
     <script src="scripts/main.js"></script>

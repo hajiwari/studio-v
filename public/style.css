@@ -149,6 +149,8 @@ h6 {
     padding: 8px 12px;
     border-radius: 6px;
     transition: all 0.3s ease;
+    font-family: inherit;
+    font-weight: 500;
 }
 
 .cart-btn:hover,
@@ -812,7 +814,13 @@ h6 {
     display: flex;
     flex-direction: column;
     gap: 0;
-    min-height: 400px;
+    min-height: 300px;
+}
+
+.modal-body .btn-primary {
+    display: block;
+    /* margin-left: auto;
+    margin-right: auto; */
 }
 
 .account-modal {
@@ -1023,12 +1031,7 @@ h6 {
     border-right: 4px solid #667eea;
 }
 
-.modal-body {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-    min-height: 400px;
-}
+
 
 .tab-content {
     flex: 1;
@@ -1686,6 +1689,8 @@ h6 {
     }
 }
 
+
+
 /* Cart Icon Styling */
 .cart-icon-wrapper {
     position: relative;
@@ -1832,8 +1837,6 @@ h6 {
 @media (max-width: 900px) {
     .nav-container {
         flex-wrap: wrap;
-        /* height: auto; */
-        /* padding: 0 10px; */
     }
 
     .nav-menu {
@@ -1883,9 +1886,27 @@ h6 {
     }
 
     .hamburger {
-        display: flex;
-        /* margin-left: auto; */
+        display: flex !important;
+        /* <-- Ensure hamburger is visible on mobile */
+        flex-direction: column;
+        cursor: pointer;
+        gap: 3px;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        background: none;
+        border: none;
         z-index: 1003;
+    }
+
+    .hamburger span {
+        width: 25px;
+        height: 3px;
+        background: #333;
+        transition: 0.3s;
+        display: block;
+        border-radius: 2px;
     }
 
     .navbar.mobile-active .nav-menu {
@@ -2282,4 +2303,3 @@ body {
 body.fade-in {
     opacity: 1;
 }
-
