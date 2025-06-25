@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Your Cart - Studio V</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
@@ -124,34 +125,31 @@
                     <div class="checkout-section">
                         <h4>Shipping Information</h4>
                         <form id="checkoutForm">
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="firstName">First Name</label>
-                                    <input type="text" id="firstName" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="lastName">Last Name</label>
-                                    <input type="text" id="lastName" required>
+                            <div class="form-group">
+                                <div class="checkout-info-line"><span class="checkout-label"
+                                        style="font-weight: bold;">Full Name:</span> <span id="checkoutFullName"></span>
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label for="address">Address</label>
-                                <input type="text" id="address" required>
+                                <div class="checkout-info-line"><span class="checkout-label"
+                                        style="font-weight: bold;">Email:</span> <span id="checkoutEmail"></span></div>
                             </div>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="city">City</label>
-                                    <input type="text" id="city" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="zipCode">ZIP Code</label>
-                                    <input type="text" id="zipCode" required>
+                            <div class="form-group">
+                                <div class="checkout-info-line"><span class="checkout-label"
+                                        style="font-weight: bold;">Preferred Time:</span>
+                                    <span id="checkoutPreferredTime"></span>
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label for="phone">Phone Number</label>
-                                <input type="tel" id="phone" required>
+                                <div class="checkout-info-line"><span class="checkout-label"
+                                        style="font-weight: bold;">Instructions:</span> <span
+                                        id="checkoutInstructions"></span></div>
                             </div>
+                            <div class="form-group">
+                                <label for="checkoutAddress" style="font-weight: bold;">Address</label>
+                                <select id="checkoutAddress" class="custom-select"></select>
+                            </div>
+                            <div id="addressMap" style="height:220px; border-radius:10px; margin-bottom:18px;"></div>
                         </form>
                     </div>
                     <div class="order-summary">
@@ -217,7 +215,13 @@
                                 </div>
                                 <div class="form-group">
                                     <label for="profilePhone">Phone</label>
-                                    <input type="tel" id="profilePhone" placeholder="e.g. 09XXXXXXXXX">
+                                    <div style="display: flex; gap: 6px;">
+                                        <input type="text" value="+63" disabled
+                                            style="width:65px; background:#f3f3f3; color:#888; border:1px solid #ddd; text-align:center;">
+                                        <input type="tel" id="profilePhone" maxlength="10" pattern="[0-9]{10}"
+                                            placeholder="9123456789" required style="flex:1;">
+                                    </div>
+                                    <small style="color:#888;">Format: 9123456789</small>
                                 </div>
                                 <div class="buttons-account-settings">
                                     <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Update
@@ -306,6 +310,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.7.1/firebase-firestore-compat.min.js"></script>
     <script src="firebase.js"></script>
     <script src="scripts/main.js"></script>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 </body>
 
 </html>

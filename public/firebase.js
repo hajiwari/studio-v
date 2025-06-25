@@ -1,6 +1,5 @@
-// Firebase Configuration for Studio V
 // Firebase SDK Configuration
-const firebaseConfig = {  
+const firebaseConfig = {
   apiKey: "AIzaSyBXsbxQ-uDmULoJNyvI-KJ6ODRngXUvy-s",
   authDomain: "online-shop-pos-cf4f8.firebaseapp.com",
   databaseURL: "https://online-shop-pos-cf4f8-default-rtdb.firebaseio.com",
@@ -91,8 +90,14 @@ class AuthService {
         displayName: displayName
       });
 
-      // Create user document in Firestore
-      await this.createUserDocument(user, { displayName });
+      // Try to create user document in Firestore, but don't fail sign-up if this fails
+      try {
+        await this.createUserDocument(user, { displayName });
+      } catch (firestoreError) {
+        console.warn('User created, but failed to create Firestore user document:', firestoreError);
+        // Optionally, you can return a warning to the UI
+        // return { success: true, user, warning: 'Account created, but profile not saved. Please check your connection.' };
+      }
 
       return { success: true, user };
     } catch (error) {

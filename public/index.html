@@ -4,10 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Studio V - Premium Clothing</title>
+    <title>Studio V</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    
 </head>
 
 <body>
@@ -139,31 +141,6 @@
             </div>
         </div>
     </section>
-
-    <!-- Cart Sidebar
-    <div class="cart-sidebar" id="cartSidebar">
-        <div class="cart-header">
-            <h3>Shopping Cart</h3>
-            <button class="close-cart" onclick="toggleCart()">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <div class="cart-items" id="cartItems">
-            // Cart items will be dynamically loaded
-        </div>
-        <div class="cart-empty" id="emptyCart" style="display: none;">
-            <i class="fas fa-shopping-cart"></i>
-            <p>Your cart is empty</p>
-        </div>
-        <div class="cart-footer">
-            <div class="cart-total">
-                <span>Total: ₱<span id="cartTotal">0.00</span></span>
-            </div>
-            <button class="btn-primary checkout-btn" onclick="proceedToCheckout()">
-                Proceed to Checkout
-            </button>
-        </div>
-    </div> -->
 
     <!-- Auth Modal -->
     <div class="modal-overlay" id="authModal">
@@ -315,7 +292,13 @@
                                 </div>
                                 <div class="form-group">
                                     <label for="profilePhone">Phone</label>
-                                    <input type="tel" id="profilePhone" placeholder="e.g. 09XXXXXXXXX">
+                                    <div style="display: flex; gap: 6px;">
+                                        <input type="text" value="+63" disabled
+                                            style="width:65px; background:#f3f3f3; color:#888; border:1px solid #ddd; text-align:center;">
+                                        <input type="tel" id="profilePhone" maxlength="10" pattern="[0-9]{10}"
+                                            placeholder="9123456789" required style="flex:1;">
+                                    </div>
+                                    <small style="color:#888;">Format: 9123456789</small>
                                 </div>
                                 <div class="buttons-account-settings">
                                     <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Update
@@ -339,6 +322,7 @@
                         </div>
                         <button class="btn-outline" onclick="addNewAddress()">Add New Address</button>
                     </div>
+
 
                     <div class="tab-pane" id="delivery">
                         <div class="delivery-options-card">
@@ -523,20 +507,6 @@
         <div class="spinner"></div>
     </div>
 
-    <!-- Notification Toast -->
-    <!-- <div class="toast" id="toast">
-        <div class="toast-content">
-            <i class="fas fa-check-circle"></i>
-            <span class="toast-message">Success!</span>
-            <button class="toast-close" onclick="hideToast()" aria-label="Close">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <div class="toast-timer-bar">
-            <div class="toast-timer-bar-inner" id="toastTimerBar"></div>
-        </div>
-    </div> -->
-
     <!-- Product Card Template -->
     <div id="productCardTemplate" style="display:none;">
         <div class="product product-card">
@@ -557,12 +527,24 @@
         </div>
     </div>
 
+    <!-- Cart Check Overlay -->
+    <div id="cartCheckOverlay" class="cart-check-overlay">
+        <div class="cart-check-content">
+            <svg class="cart-checkmark" viewBox="0 0 52 52">
+                <circle class="cart-checkmark-circle" cx="26" cy="26" r="25" fill="none" />
+                <path class="cart-checkmark-check" fill="none" d="M14 27l7 7 17-17" />
+            </svg>
+            <div class="cart-check-caption" id="cartCheckCaption"></div>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.7.1/firebase-app-compat.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.7.1/firebase-auth-compat.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.7.1/firebase-firestore-compat.min.js"></script>
     <script src="firebase.js"></script>
     <script src="scripts/main.js"></script>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 </body>
 
 </html>

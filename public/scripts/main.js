@@ -1,5 +1,3 @@
-// Studio V - Main Application Logic
-
 // Global State Management
 const AppState = {
     user: null,
@@ -120,13 +118,66 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 
+document.addEventListener('DOMContentLoaded', function () {
+    const cartBtn = document.querySelector('.cart-btn');
+    if (cartBtn) {
+        cartBtn.onclick = function (e) {
+            e.preventDefault();
+            if (!AppState.user) {
+                // showToast('Please sign in to view your cart.', 'warning');
+                showAuthModal();
+            } else {
+                window.location.href = 'cart.html';
+            }
+        };
+    }
+});
+
+// Update Auth UI based on user state
+async function saveCartToFirestore() {
+    if (!AppState.user) return;
+    try {
+        await window.firebase.firestore()
+            .collection('users')
+            .doc(AppState.user.uid)
+            .collection('cart')
+            .doc('cart')
+            .set({ items: AppState.cart });
+    } catch (e) {
+        console.warn('Failed to save cart to Firestore:', e);
+    }
+}
+
+async function loadCartFromFirestore() {
+    if (!AppState.user) return;
+    try {
+        const doc = await window.firebase.firestore()
+            .collection('users')
+            .doc(AppState.user.uid)
+            .collection('cart')
+            .doc('cart')
+            .get();
+        if (doc.exists && doc.data().items) {
+            AppState.cart = doc.data().items;
+        } else {
+            AppState.cart = [];
+        }
+    } catch (e) {
+        AppState.cart = [];
+    }
+}
+
 // Fade out effect for nav links and cart button
 document.querySelectorAll('.nav-link, .cart-btn').forEach(el => {
     el.addEventListener('click', function (e) {
-        // For <a> tags, get href; for button, check class
         const href = this.getAttribute('href');
         if (href || this.classList.contains('cart-btn')) {
             e.preventDefault();
+            if (this.classList.contains('cart-btn') && !AppState.user) {
+                showToast('Please sign in to view your cart.', 'warning');
+                showAuthModal();
+                return; // Prevent redirect
+            }
             document.body.classList.add('fade-out');
             setTimeout(() => {
                 if (this.classList.contains('cart-btn')) {
@@ -143,6 +194,7 @@ window.addEventListener('DOMContentLoaded', function () {
     document.body.classList.remove('fade-out');
     document.body.classList.add('fade-in');
 });
+
 // DOM Content Loaded Event
 document.addEventListener('DOMContentLoaded', function () {
     initializeApp();
@@ -159,14 +211,20 @@ function initializeApp() {
 
     // Check if user is logged in
     if (window.firebase && window.firebase.auth) {
-        window.firebase.auth().onAuthStateChanged(function (user) {
+        window.firebase.auth().onAuthStateChanged(async function (user) {
             if (user) {
                 AppState.user = user;
                 updateAuthUI(true);
                 loadUserData();
+                // Load cart from Firestore on user sign-in, then update UI
+                await loadCartFromFirestore();
+                updateCartUI();
             } else {
                 AppState.user = null;
-                updateAuthUI(false);
+                AppState.cart = [];
+                updateCartUI();
+                // Optionally clear localStorage cart as well
+                localStorage.removeItem('studioV_cart');
             }
         });
     }
@@ -354,6 +412,13 @@ function loadMoreProducts() {
 
 // Cart Management
 function addToCart(productId, size = null, color = null) {
+    // Require sign-in before adding to cart
+    if (!AppState.user) {
+        showToast('Please sign in to add items to your cart.', 'warning');
+        showAuthModal();
+        return;
+    }
+
     const product = AppState.products.find(p => p.id === productId);
     if (!product) return;
 
@@ -379,7 +444,36 @@ function addToCart(productId, size = null, color = null) {
 
     updateCartUI();
     saveCartToStorage();
-    showToast('Product added to cart!', 'success');
+    showCartCheck(product.name);
+    saveCartToFirestore();
+}
+
+// Add to Cart Check Animation
+function showCartCheck(productName) {
+    const overlay = document.getElementById('cartCheckOverlay');
+    const caption = document.getElementById('cartCheckCaption');
+    if (!overlay || !caption) return;
+
+    caption.textContent = `${productName} is added to your cart`;
+    overlay.classList.add('show');
+
+    // Restart SVG animation
+    const checkmark = overlay.querySelector('.cart-checkmark');
+    const circle = overlay.querySelector('.cart-checkmark-circle');
+    const check = overlay.querySelector('.cart-checkmark-check');
+    if (circle && check) {
+        circle.style.strokeDashoffset = 166;
+        check.style.strokeDashoffset = 48;
+        // Force reflow for restart
+        void circle.offsetWidth;
+        void check.offsetWidth;
+        circle.style.animation = 'cartCheckCircle 0.4s ease-in-out forwards';
+        check.style.animation = 'cartCheckCheck 0.3s 0.35s cubic-bezier(.65,.05,.36,1) forwards';
+    }
+
+    setTimeout(() => {
+        overlay.classList.remove('show');
+    }, 2400);
 }
 
 function removeFromCart(index) {
@@ -393,6 +487,7 @@ function removeFromCart(index) {
             showToast('Product removed from cart', 'info');
         }
     });
+    saveCartToFirestore();
 }
 
 // --- Confirmation Modal Utility ---
@@ -465,6 +560,7 @@ function updateCartQuantity(index, newQuantity) {
     AppState.cart[index].quantity = newQuantity;
     updateCartUI();
     saveCartToStorage();
+    saveCartToFirestore();
 }
 
 function updateCartUI() {
@@ -478,7 +574,14 @@ function updateCartUI() {
 
     if (cartCount) cartCount.textContent = totalItems;
     if (cartTotal) cartTotal.textContent = totalPrice.toFixed(2);
-
+    if (cartCount) {
+        if (!AppState.user) {
+            cartCount.style.display = 'none';
+        } else {
+            cartCount.style.display = '';
+            cartCount.textContent = AppState.cart.reduce((sum, item) => sum + item.quantity, 0);
+        }
+    }
     if (cartItems) {
         if (AppState.cart.length === 0) {
             cartItems.style.display = 'none';
@@ -647,6 +750,113 @@ function hideCheckoutModal() {
     }
 }
 
+async function populateCheckoutUserInfo() {
+    if (!AppState.user || !window.firebase?.firestore) return;
+
+    // Get profile info
+    const userDoc = await window.firebase.firestore().collection('users').doc(AppState.user.uid).get();
+    const userData = userDoc.exists ? userDoc.data() : {};
+
+    document.getElementById('checkoutFullName').textContent = userData.name || AppState.user.displayName || '';
+    document.getElementById('checkoutEmail').textContent = AppState.user.email || userData.email || '';
+
+    // Delivery preferences
+    const delivery = userData.deliveryOptions || {};
+    document.getElementById('checkoutPreferredTime').textContent =
+        delivery.time ? delivery.time.charAt(0).toUpperCase() + delivery.time.slice(1) : '';
+    document.getElementById('checkoutInstructions').textContent = delivery.instructions || '';
+
+    // Load addresses
+    const addressSelect = document.getElementById('checkoutAddress');
+    addressSelect.innerHTML = '<option>Loading...</option>';
+    const addressesSnap = await window.firebase.firestore()
+        .collection('users').doc(AppState.user.uid)
+        .collection('addresses').orderBy('createdAt', 'desc').get();
+
+    if (addressesSnap.empty) {
+        addressSelect.innerHTML = '<option value="">No address found. Please add one in Account Settings.</option>';
+    } else {
+        addressSelect.innerHTML = '';
+        addressesSnap.docs.forEach(doc => {
+            const addr = doc.data();
+            const label = `${addr.label || ''} ${addr.region || ''}, ${addr.city || ''}, ${addr.barangay || ''}`;
+            addressSelect.innerHTML += `<option value="${doc.id}" data-lat="${addr.lat || ''}" data-lng="${addr.lng || ''}">${label}</option>`;
+        });
+    }
+
+    // Show map for selected address
+    addressSelect.onchange = () => showAddressMap(addressesSnap, addressSelect.value);
+    if (addressesSnap.docs.length > 0) {
+        showAddressMap(addressesSnap, addressSelect.value || addressesSnap.docs[0].id);
+    }
+}
+// Show map using Leaflet for the selected address
+async function showAddressMap(addressesSnap, selectedId) {
+    const addrDoc = addressesSnap.docs.find(doc => doc.id === selectedId);
+    if (!addrDoc) return;
+    const addr = addrDoc.data();
+
+    // Build location string using only province, city, barangay
+    const locationParts = [
+        addr.barangay || '',
+        addr.city || '',
+        addr.province || '',
+        addr.region || '',
+        'Philippines'
+    ].filter(Boolean);
+    const locationQuery = locationParts.join(', ');
+
+    let lat = addr.lat, lng = addr.lng;
+    if (!lat || !lng) {
+        try {
+            const resp = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(locationQuery)}`);
+            const data = await resp.json();
+            if (data && data[0]) {
+                lat = parseFloat(data[0].lat);
+                lng = parseFloat(data[0].lon);
+                // Optionally save to Firestore for future
+                window.firebase.firestore().collection('users').doc(AppState.user.uid)
+                    .collection('addresses').doc(addrDoc.id).set({ lat, lng }, { merge: true });
+            }
+        } catch (e) { /* ignore */ }
+    }
+
+    // Choose zoom level: 15 for barangay, 13 for city, 10 for province
+    let zoom = 13;
+    if (addr.barangay) zoom = 15;
+    else if (addr.city) zoom = 13;
+    else if (addr.province) zoom = 10;
+
+    // Initialize or update Leaflet map
+    if (!window.checkoutMap) {
+        window.checkoutMap = L.map('addressMap').setView([lat || 13, lng || 122], zoom);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(window.checkoutMap);
+        window.checkoutMapMarker = L.marker([lat, lng]).addTo(window.checkoutMap);
+    } else {
+        window.checkoutMap.setView([lat || 13, lng || 122], zoom);
+        if (window.checkoutMapMarker) window.checkoutMap.removeLayer(window.checkoutMapMarker);
+        window.checkoutMapMarker = L.marker([lat, lng]).addTo(window.checkoutMap);
+    }
+}
+
+// When showing checkout modal, populate info
+function showCheckoutModal() {
+    if (AppState.cart.length === 0) {
+        showToast('Your cart is empty!', 'error');
+        return;
+    }
+    const modal = document.getElementById('checkoutModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+        updateCheckoutSummary();
+        populateCheckoutUserInfo();
+    }
+}
+
+
 function showAccountModal() {
     const modal = document.getElementById('accountModal');
     if (modal) {
@@ -672,6 +882,12 @@ function logoutUser() {
                 showToast('You have been logged out.', 'success');
                 hideAccountModal();
                 updateAuthUI(false);
+                // If on cart.html, redirect to index.html after logout
+                if (window.location.pathname.endsWith('cart.html')) {
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 800); // Give time for toast/modal to show
+                }
             })
             .catch((error) => {
                 showToast('Logout failed: ' + error.message, 'error');
@@ -719,22 +935,21 @@ function handleAuthSubmit(e) {
 }
 
 async function signUpUser(email, password, fullName) {
+    showLoading(true);
     try {
-        if (window.firebase && window.firebase.auth) {
-            const userCredential = await window.firebase.auth().createUserWithEmailAndPassword(email, password);
-            await userCredential.user.updateProfile({ displayName: fullName });
-
-            // Save user data to Firestore
-            if (window.firebase.firestore) {
-                await window.firebase.firestore().collection('users').doc(userCredential.user.uid).set({
-                    name: fullName,
-                    email: email,
-                    createdAt: new Date()
-                });
-            }
-
+        const result = await authService.signUp(email, password, fullName);
+        if (result.success) {
             showToast('Account created successfully!', 'success');
+            if (result.warning) {
+                showToast(result.warning, 'warning');
+            }
+            // Reload user to get updated displayName
+            await window.firebase.auth().currentUser.reload();
+            AppState.user = window.firebase.auth().currentUser;
+            updateAuthUI(true); // Update UI with new displayName
             hideAuthModal();
+        } else {
+            showToast(result.error, 'error');
         }
     } catch (error) {
         showToast(error.message, 'error');
@@ -744,11 +959,14 @@ async function signUpUser(email, password, fullName) {
 }
 
 async function signInUser(email, password) {
+    showLoading(true);
     try {
-        if (window.firebase && window.firebase.auth) {
-            await window.firebase.auth().signInWithEmailAndPassword(email, password);
+        const result = await authService.signIn(email, password);
+        if (result.success) {
             showToast('Signed in successfully!', 'success');
             hideAuthModal();
+        } else {
+            showToast(result.error, 'error');
         }
     } catch (error) {
         showToast(error.message, 'error');
@@ -811,28 +1029,16 @@ function updateAuthUI(isSignedIn) {
             authBtn.onclick = showAuthModal;
             if (getStartedBtn) getStartedBtn.style.display = '';
             if (userIcon) userIcon.style.display = '';
+            // Scroll to top/landing when logged out
+            const landing = document.getElementById('landing');
+            if (landing) {
+                landing.scrollIntoView({ behavior: 'smooth' });
+            } else {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
         }
     }
 }
-
-// document.addEventListener('DOMContentLoaded', function () {
-//     // Hide auth button until Firebase checks auth state
-//     const authBtn = document.querySelector('.auth-btn');
-//     if (authBtn) authBtn.classList.add('hidden');
-
-//     // Wait for Firebase Auth to check user state
-//     if (window.firebase && window.firebase.auth) {
-//         window.firebase.auth().onAuthStateChanged(function (user) {
-//             // Update UI based on user
-//             updateAuthUI(!!user);
-//             // Show the button after auth state is known
-//             if (authBtn) authBtn.classList.remove('hidden');
-//         });
-//     } else {
-//         // If Firebase not loaded, show button anyway
-//         if (authBtn) authBtn.classList.remove('hidden');
-//     }
-// });
 
 // Checkout Functions
 function proceedToCheckout() {
@@ -877,25 +1083,37 @@ function handleCheckoutSubmit(e) {
 }
 
 async function placeOrder() {
-    const form = document.getElementById('checkoutForm');
-    const formData = new FormData(form);
+    const addressSelect = document.getElementById('checkoutAddress');
+    const selectedAddressId = addressSelect.value;
+    let shippingInfo = {};
+    if (selectedAddressId) {
+        const addrDoc = await window.firebase.firestore()
+            .collection('users').doc(AppState.user.uid)
+            .collection('addresses').doc(selectedAddressId).get();
+        if (addrDoc.exists) {
+            const addr = addrDoc.data();
+            // Map to required fields for Firestore rules
+            shippingInfo = {
+                firstName: AppState.user.displayName?.split(' ')[0] || 'N/A',
+                lastName: AppState.user.displayName?.split(' ').slice(1).join(' ') || 'N/A',
+                address: `${addr.houseNumber || ''} ${addr.street || ''}`.trim(),
+                city: addr.city || '',
+                zipCode: addr.zip || '',
+                // Optionally include all address fields for reference
+                ...addr
+            };
+        }
+    }
 
     const orderData = {
-        userId: AppState.user?.uid,
+        userId: AppState.user.uid,
         items: AppState.cart,
-        shippingInfo: {
-            firstName: document.getElementById('firstName').value,
-            lastName: document.getElementById('lastName').value,
-            address: document.getElementById('address').value,
-            city: document.getElementById('city').value,
-            zipCode: document.getElementById('zipCode').value,
-            phone: document.getElementById('phone').value
-        },
+        shippingInfo,
         subtotal: AppState.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
         shipping: 9.99,
         total: AppState.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0) + 9.99,
         status: 'pending',
-        createdAt: new Date()
+        createdAt: window.firebase.firestore.FieldValue.serverTimestamp()
     };
 
     showLoading(true);
@@ -931,94 +1149,6 @@ function showTab(tabName) {
         loadUserOrders();
     } else if (tabName === 'addresses') {
         loadUserAddresses();
-    }
-}
-
-async function loadUserData() {
-    if (!AppState.user) return;
-
-    // Get the email from Firebase Auth user
-    const profileEmail = document.getElementById('profileEmail');
-    if (profileEmail) {
-        profileEmail.value = AppState.user.email || '';
-    }
-
-    const profileName = document.getElementById('profileName');
-    if (profileName) {
-        profileName.value = AppState.user.displayName || '';
-    }
-
-    try {
-        const userDoc = await window.firebase.firestore()
-            .collection('users')
-            .doc(AppState.user.uid)
-            .get();
-
-        // Always use the current Firebase Auth email
-        const profileName = document.getElementById('profileName');
-        const profileEmail = document.getElementById('profileEmail');
-        const profilePhone = document.getElementById('profilePhone');
-
-        if (userDoc.exists) {
-            const userData = userDoc.data();
-            if (profileName) profileName.value = userData.name || AppState.user.displayName || '';
-            if (profileEmail) profileEmail.value = AppState.user.email || userData.email || '';
-            if (profilePhone) profilePhone.value = userData.phone || '';
-        } else {
-            // If no Firestore doc, fallback to Auth
-            if (profileName) profileName.value = AppState.user.displayName || '';
-            if (profileEmail) profileEmail.value = AppState.user.email || '';
-            if (profilePhone) profilePhone.value = '';
-        }
-    } catch (error) {
-        console.error('Error loading user data:', error);
-    }
-}
-
-// Handle profile update
-async function handleProfileSubmit(e) {
-    e.preventDefault();
-
-    const profileName = document.getElementById('profileName').value.trim();
-    const profileEmail = document.getElementById('profileEmail').value.trim();
-    const profilePhone = document.getElementById('profilePhone').value.trim();
-
-    if (!AppState.user) {
-        showToast('You must be signed in to update your profile.', 'error');
-        return;
-    }
-
-    showLoading(true);
-
-    try {
-        // Update Firestore user document
-        await window.firebase.firestore()
-            .collection('users')
-            .doc(AppState.user.uid)
-            .set({
-                name: profileName,
-                email: profileEmail,
-                phone: profilePhone
-            }, { merge: true });
-
-        // Update Firebase Auth email if changed
-        if (AppState.user.email !== profileEmail) {
-            await AppState.user.updateEmail(profileEmail);
-        }
-        // Update Firebase Auth displayName if changed
-        if (AppState.user.displayName !== profileName) {
-            await AppState.user.updateProfile({ displayName: profileName });
-        }
-
-        showToast('Profile updated successfully!', 'success');
-        // Reload user data to reflect changes
-        await window.firebase.auth().currentUser.reload();
-        AppState.user = window.firebase.auth().currentUser;
-        loadUserData();
-    } catch (error) {
-        showToast('Failed to update profile: ' + error.message, 'error');
-    } finally {
-        showLoading(false);
     }
 }
 
@@ -1061,33 +1191,393 @@ async function loadUserOrders() {
     }
 }
 
-function loadUserAddresses() {
+// Load user profile, addresses, and delivery options on modal open or refresh
+async function loadUserData() {
+    if (!AppState.user) return;
+
+    // Load profile info
+    const profileEmail = document.getElementById('profileEmail');
+    const profileName = document.getElementById('profileName');
+    const profilePhone = document.getElementById('profilePhone');
+    if (profileEmail) profileEmail.value = AppState.user.email || '';
+    if (profileName) profileName.value = AppState.user.displayName || '';
+    if (profilePhone) profilePhone.value = '';
+
+    try {
+        const userDoc = await window.firebase.firestore()
+            .collection('users')
+            .doc(AppState.user.uid)
+            .get();
+
+        if (userDoc.exists) {
+            const userData = userDoc.data();
+            if (profileName) profileName.value = userData.name || AppState.user.displayName || '';
+            if (profileEmail) profileEmail.value = AppState.user.email || userData.email || '';
+            if (profilePhone) {
+                // Remove +63 if present, show only the rest
+                let phone = userData.phone || '';
+                if (phone.startsWith('+63')) phone = phone.slice(3);
+                profilePhone.value = phone;
+            }
+            // Load delivery options
+            loadDeliveryOptions(userData.deliveryOptions || {});
+        } else {
+            if (profilePhone) profilePhone.value = '';
+            if (profileName) profileName.value = AppState.user.displayName || '';
+            if (profileEmail) profileEmail.value = AppState.user.email || '';
+            loadDeliveryOptions({});
+        }
+    } catch (error) {
+        console.error('Error loading user data:', error);
+    }
+
+    // Load addresses
+    await loadUserAddresses();
+}
+
+// Save profile info (name, phone, delivery options)
+async function handleProfileSubmit(e) {
+    e.preventDefault();
+
+    const profileName = document.getElementById('profileName').value.trim();
+    let profilePhone = document.getElementById('profilePhone').value.trim();
+
+    // Validate phone: must be 10 digits
+    profilePhone = profilePhone.replace(/\D/g, '');
+
+    if (!/^[0-9]{10}$/.test(profilePhone)) {
+        showToast('Please enter a valid 10-digit phone number.', 'error');
+        return;
+    }
+
+    if (!AppState.user) {
+        showToast('You must be signed in to update your profile.', 'error');
+        return;
+    }
+
+    showLoading(true);
+
+    try {
+        // Save delivery options
+        const deliveryOptions = getDeliveryOptionsFromForm();
+
+        // Update Firestore user document
+        await window.firebase.firestore()
+            .collection('users')
+            .doc(AppState.user.uid)
+            .set({
+                name: profileName,
+                phone: profilePhone,
+                deliveryOptions
+            }, { merge: true });
+
+        // Update Firebase Auth displayName if changed
+        if (AppState.user.displayName !== profileName) {
+            await AppState.user.updateProfile({ displayName: profileName });
+        }
+
+        showToast('Profile updated successfully!', 'success');
+        await window.firebase.auth().currentUser.reload();
+        AppState.user = window.firebase.auth().currentUser;
+        loadUserData();
+    } catch (error) {
+        showToast('Failed to update profile: ' + error.message, 'error');
+    } finally {
+        showLoading(false);
+    }
+}
+
+// --- DELIVERY OPTIONS ---
+function getDeliveryOptionsFromForm() {
+    const time = document.querySelector('input[name="deliveryTime"]:checked')?.value || '';
+    const instructions = document.getElementById('deliveryInstructions')?.value || '';
+    return { time, instructions };
+}
+
+function loadDeliveryOptions(options) {
+    if (options.time) {
+        const radio = document.querySelector(`input[name="deliveryTime"][value="${options.time}"]`);
+        if (radio) radio.checked = true;
+    }
+    if (options.instructions !== undefined) {
+        const textarea = document.getElementById('deliveryInstructions');
+        if (textarea) textarea.value = options.instructions;
+    }
+}
+
+async function saveDeliveryOptions() {
+    if (!AppState.user) return;
+    showLoading(true);
+    try {
+        const deliveryOptions = getDeliveryOptionsFromForm();
+        await window.firebase.firestore()
+            .collection('users')
+            .doc(AppState.user.uid)
+            .set({ deliveryOptions }, { merge: true });
+        showToast('Delivery preferences saved!', 'success');
+    } catch (error) {
+        showToast('Failed to save delivery options: ' + error.message, 'error');
+    } finally {
+        showLoading(false);
+    }
+}
+
+// --- ADDRESSES MANAGEMENT ---
+
+// Render addresses list and allow add/edit/delete
+async function loadUserAddresses() {
+    const addressesList = document.getElementById('addressesList');
+    if (!addressesList || !AppState.user) return;
+
+    addressesList.innerHTML = '<p>Loading addresses...</p>';
+    try {
+        const snapshot = await window.firebase.firestore()
+            .collection('users')
+            .doc(AppState.user.uid)
+            .collection('addresses')
+            .orderBy('createdAt', 'desc')
+            .get();
+
+        if (snapshot.empty) {
+            addressesList.innerHTML = '<p>No addresses found. Add your first address!</p>';
+            return;
+        }
+
+        addressesList.innerHTML = snapshot.docs.map(doc => {
+            const addr = doc.data();
+            return `
+                <div class="address-card" data-id="${doc.id}">
+                    <div class="address-info">
+                        <div class="address-label">${addr.label || 'Home/Work'}</div>
+                        <div class="address-details">
+                            ${addr.region || ''}, ${addr.city || ''}, ${addr.barangay || ''}<br>
+                            ${addr.street || ''} ${addr.houseNumber || ''}<br>
+                            ZIP: ${addr.zip || ''}
+                        </div>
+                    </div>
+                    <div class="address-actions">
+                        <button class="btn-outline edit-address-btn" onclick="editAddress('${doc.id}')"><i class="fas fa-edit"></i> Edit</button>
+                        <button class="btn-outline delete-address-btn" onclick="deleteAddress('${doc.id}')"><i class="fas fa-trash"></i> Delete</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    } catch (error) {
+        addressesList.innerHTML = '<p>Error loading addresses.</p>';
+    }
+}
+
+// --- Inline Address Form with Dynamic Dropdowns ---
+
+// Helper: Fetch PSGC API
+async function fetchPSGC(endpoint) {
+    const url = `https://psgc.gitlab.io/api/${endpoint}`;
+    const res = await fetch(url);
+    return res.json();
+}
+
+// Show inline address form (add or edit)
+window.showInlineAddressForm = async function (addressId = null, data = {}) {
     const addressesList = document.getElementById('addressesList');
     if (!addressesList) return;
 
-    // This would typically load from Firestore
-    addressesList.innerHTML = `
-    <div class="address-card">
-        <div class="address-info">
-            <div class="address-label">Home Address</div>
-            <div class="address-details">
-                123 Main Street<br>
-                City, State 12345
-            </div>
-        </div>
-        <div class="address-actions">
-            <button class="btn-outline edit-address-btn"><i class="fas fa-edit"></i> Edit</button>
-            <button class="btn-outline delete-address-btn"><i class="fas fa-trash"></i> Delete</button>
-        </div>
-    </div>
-`;
-}
+    // Hide address list and add button
+    addressesList.style.display = 'none';
+    const addBtn = document.querySelector('#addresses .btn-outline');
+    if (addBtn) addBtn.style.display = 'none';
 
-function handleProfileSubmit(e) {
-    e.preventDefault();
-    // Update user profile
-    showToast('Profile updated successfully!', 'success');
-}
+    // Remove any existing form
+    let formDiv = document.getElementById('inlineAddressForm');
+    if (formDiv) formDiv.remove();
+
+    // Insert form after addressesList
+    formDiv = document.createElement('div');
+    formDiv.id = 'inlineAddressForm';
+    formDiv.style.margin = '30px 0';
+
+    // Initial values
+    const selectedRegion = data.regionCode || '';
+    const selectedProvince = data.provinceCode || '';
+    const selectedCity = data.cityCode || '';
+    const selectedBarangay = data.barangayCode || '';
+
+    formDiv.innerHTML = `
+        <form id="addressForm" style="padding: 0px 32px 28px 0px;">
+            <div class="form-row">
+                <div class="form-group" style="flex:1;">
+                    <label for="regionSelect">Region</label>
+                    <select id="regionSelect" required></select>
+                </div>
+                <div class="form-group" style="flex:1;">
+                    <label for="provinceSelect">Province</label>
+                    <select id="provinceSelect" required></select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group" style="flex:1;">
+                    <label for="citySelect">City/Municipality</label>
+                    <select id="citySelect" required></select>
+                </div>
+                <div class="form-group" style="flex:1;">
+                    <label for="barangaySelect">Barangay</label>
+                    <select id="barangaySelect" required></select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group" style="flex:1;">
+                    <label for="street">Street</label>
+                    <input type="text" id="street" value="${data.street || ''}" required>
+                </div>
+                <div class="form-group" style="flex:1;">
+                    <label for="houseNumber">House Number</label>
+                    <input type="text" id="houseNumber" value="${data.houseNumber || ''}" required>
+                </div>
+                <div class="form-group" style="flex:1;">
+                    <label for="zip">ZIP</label>
+                    <input type="text" id="zip" value="${data.zip || ''}" required>
+                </div>
+            </div>
+            <div style="margin-top:18px;display:flex;gap:12px;">
+                <button type="submit" class="btn-primary">${addressId ? 'Update' : 'Add'} Address</button>
+                <button type="button" class="btn-secondary" id="cancelAddressBtn">Cancel</button>
+            </div>
+        </form>
+    `;
+    addressesList.parentNode.insertBefore(formDiv, addressesList.nextSibling);
+
+    // PSGC Dropdown logic
+    const regionSelect = formDiv.querySelector('#regionSelect');
+    const provinceSelect = formDiv.querySelector('#provinceSelect');
+    const citySelect = formDiv.querySelector('#citySelect');
+    const barangaySelect = formDiv.querySelector('#barangaySelect');
+
+    // Load regions
+    const regions = await fetchPSGC('regions/');
+    regionSelect.innerHTML = `<option value="">Select Region</option>` +
+        regions.map(r => `<option value="${r.code}" ${r.code === selectedRegion ? 'selected' : ''}>${r.name}</option>`).join('');
+
+    // Load provinces when region changes
+    regionSelect.onchange = async function () {
+        provinceSelect.innerHTML = `<option value="">Loading...</option>`;
+        const provinces = await fetchPSGC(`regions/${regionSelect.value}/provinces/`);
+        provinceSelect.innerHTML = `<option value="">Select Province</option>` +
+            provinces.map(p => `<option value="${p.code}" ${p.code === selectedProvince ? 'selected' : ''}>${p.name}</option>`).join('');
+        provinceSelect.dispatchEvent(new Event('change'));
+    };
+
+    // Load cities/municipalities when province changes
+    provinceSelect.onchange = async function () {
+        citySelect.innerHTML = `<option value="">Loading...</option>`;
+        const cities = await fetchPSGC(`provinces/${provinceSelect.value}/cities-municipalities/`);
+        citySelect.innerHTML = `<option value="">Select City/Municipality</option>` +
+            cities.map(c => `<option value="${c.code}" ${c.code === selectedCity ? 'selected' : ''}>${c.name}</option>`).join('');
+        citySelect.dispatchEvent(new Event('change'));
+    };
+
+    // Load barangays when city changes
+    citySelect.onchange = async function () {
+        barangaySelect.innerHTML = `<option value="">Loading...</option>`;
+        const barangays = await fetchPSGC(`cities-municipalities/${citySelect.value}/barangays/`);
+        barangaySelect.innerHTML = `<option value="">Select Barangay</option>` +
+            barangays.map(b => `<option value="${b.code}" ${b.code === selectedBarangay ? 'selected' : ''}>${b.name}</option>`).join('');
+    };
+
+    // Pre-select if editing
+    if (selectedRegion) {
+        regionSelect.value = selectedRegion;
+        await regionSelect.onchange();
+        if (selectedProvince) {
+            provinceSelect.value = selectedProvince;
+            await provinceSelect.onchange();
+            if (selectedCity) {
+                citySelect.value = selectedCity;
+                await citySelect.onchange();
+                if (selectedBarangay) {
+                    barangaySelect.value = selectedBarangay;
+                }
+            }
+        }
+    }
+
+    // Submit handler
+    formDiv.querySelector('#addressForm').onsubmit = async function (e) {
+        e.preventDefault();
+        if (!AppState.user) return;
+
+        // Get selected text for display
+        const regionText = regionSelect.options[regionSelect.selectedIndex]?.text || '';
+        const provinceText = provinceSelect.options[provinceSelect.selectedIndex]?.text || '';
+        const cityText = citySelect.options[citySelect.selectedIndex]?.text || '';
+        const barangayText = barangaySelect.options[barangaySelect.selectedIndex]?.text || '';
+
+        const addressData = {
+            region: regionText,
+            regionCode: regionSelect.value,
+            province: provinceText,
+            provinceCode: provinceSelect.value,
+            city: cityText,
+            cityCode: citySelect.value,
+            barangay: barangayText,
+            barangayCode: barangaySelect.value,
+            street: formDiv.querySelector('#street').value,
+            houseNumber: formDiv.querySelector('#houseNumber').value,
+            zip: formDiv.querySelector('#zip').value,
+            updatedAt: new Date()
+        };
+
+        showLoading(true);
+        try {
+            const ref = window.firebase.firestore()
+                .collection('users')
+                .doc(AppState.user.uid)
+                .collection('addresses');
+            if (addressId) {
+                await ref.doc(addressId).set(addressData, { merge: true });
+                showToast('Address updated!', 'success');
+            } else {
+                addressData.createdAt = new Date();
+                await ref.add(addressData);
+                showToast('Address added!', 'success');
+            }
+            hideInlineAddressForm();
+            loadUserAddresses();
+        } catch (error) {
+            showToast('Failed to save address: ' + error.message, 'error');
+        } finally {
+            showLoading(false);
+        }
+    };
+
+    // Cancel button
+    formDiv.querySelector('#cancelAddressBtn').onclick = hideInlineAddressForm;
+};
+
+// Hide inline form and restore address list
+window.hideInlineAddressForm = function () {
+    const addressesList = document.getElementById('addressesList');
+    if (addressesList) addressesList.style.display = '';
+    const addBtn = document.querySelector('#addresses .btn-outline');
+    if (addBtn) addBtn.style.display = '';
+    const formDiv = document.getElementById('inlineAddressForm');
+    if (formDiv) formDiv.remove();
+};
+
+// Override add/edit address buttons to use inline form
+window.addNewAddress = function () {
+    window.showInlineAddressForm();
+};
+window.editAddress = async function (addressId) {
+    if (!AppState.user) return;
+    const doc = await window.firebase.firestore()
+        .collection('users')
+        .doc(AppState.user.uid)
+        .collection('addresses')
+        .doc(addressId)
+        .get();
+    if (doc.exists) {
+        window.showInlineAddressForm(doc.id, doc.data());
+    }
+};
 
 // Hero Background Carousel
 (function heroBgCarousel() {
@@ -1241,90 +1731,7 @@ function handleScroll() {
     }
 }
 
-// Product View Functions
-// function viewProduct(productId) {
-//     const product = AppState.products.find(p => p.id === productId);
-//     if (!product) return;
-
-//     // Create or select the modal
-//     let modal = document.getElementById('productPreviewModal');
-//     if (!modal) {
-//         modal = document.createElement('div');
-//         modal.id = 'productPreviewModal';
-//         modal.className = 'modal-overlay show';
-//         modal.innerHTML = `
-//             <div class="modal modal-large" style="position:relative;">
-//                 <button class="close-modal" style="position:absolute;top:18px;right:18px;z-index:2;" onclick="hideProductPreview()">
-//                     <i class="fas fa-times"></i>
-//                 </button>
-//                 <div class="modal-body" id="previewBody"></div>
-//             </div>
-//         `;
-//         document.body.appendChild(modal);
-//     } else {
-//         modal.style.display = 'flex';
-//         modal.classList.add('show');
-//     }
-//     document.body.style.overflow = 'hidden';
-
-//     // Fill modal content
-//     document.getElementById('previewBody').innerHTML = `
-//         <div style="display:flex;flex-wrap:wrap;gap:32px;align-items:flex-start;">
-//             <img src="${product.image}" alt="${product.name}" style="width:320px;max-width:100%;border-radius:12px;box-shadow:0 2px 12px rgba(102,126,234,0.08);background:#f8f9fa;">
-//             <div style="flex:1;min-width:220px;">
-//                 <h2 id="previewTitle" style="font-size:2rem;font-weight:700;margin-bottom:10px;">${product.name}</h2>
-//                 <div style="margin-bottom:10px;">
-//                     <span class="product-category">${product.category.charAt(0).toUpperCase() + product.category.slice(1)}</span>
-//                 </div>
-//                 <div style="margin-bottom:10px;">
-//                     <span class="product-rating">${generateStars(product.rating)} <span class="rating-text">(${product.rating})</span></span>
-//                 </div>
-//                 <div style="margin-bottom:18px;">
-//                     <span class="product-price" style="font-size:1.3rem;font-weight:700;color:#764ba2;">₱${product.price.toFixed(2)}</span>
-//                 </div>
-//                 <div style="margin-bottom:18px;">
-//                     <div style="margin-bottom:6px;font-weight:500;">Description:</div>
-//                     <div style="color:#444;">${product.description}</div>
-//                 </div>
-//                 ${product.sizes ? `
-//                 <div style="margin-bottom:12px;">
-//                     <div style="margin-bottom:4px;font-weight:500;">Available Sizes:</div>
-//                     <div class="product-sizes">
-//                         ${product.sizes.map(size => `<span class="size-tag">${size}</span>`).join('')}
-//                     </div>
-//                 </div>
-//                 ` : ''}
-//                 ${product.colors ? `
-//                 <div style="margin-bottom:12px;">
-//                     <div style="margin-bottom:4px;font-weight:500;">Available Colors:</div>
-//                     <div class="product-sizes">
-//                         ${product.colors.map(color => `<span class="size-tag">${color}</span>`).join('')}
-//                     </div>
-//                 </div>
-//                 ` : ''}
-//                 <button class="btn-primary" style="margin-top:18px;" onclick="addToCart('${product.id}')">
-//                     <i class="fas fa-shopping-cart"></i> Add to Cart
-//                 </button>
-//             </div>
-//         </div>
-//     `;
-
-//     // Close modal on ESC or click outside
-//     function closeOnEsc(e) {
-//         if (e.key === "Escape") hideProductPreview();
-//     }
-//     function closeOnClickOutside(e) {
-//         if (e.target === modal) hideProductPreview();
-//     }
-//     modal.addEventListener('mousedown', closeOnClickOutside);
-//     window.addEventListener('keydown', closeOnEsc);
-
-//     // Remove listeners when modal closes
-//     modal._removeListeners = function() {
-//         modal.removeEventListener('mousedown', closeOnClickOutside);
-//         window.removeEventListener('keydown', closeOnEsc);
-//     };
-// }
+// Product Preview Modal
 function viewProduct(productId) {
     const product = AppState.products.find(p => p.id === productId);
     if (!product) return;
@@ -1374,6 +1781,7 @@ function viewProduct(productId) {
                     <div class="product-sizes" id="modalSizes">
                         ${product.sizes.map(size => `<span class="size-tag" data-size="${size}">${size}</span>`).join('')}
                     </div>
+                    <div id="sizeWarning" style="color:#e74c3c;font-size:0.78rem;display:none;margin-top:4px;"></div>
                 </div>
                 ` : ''}
                 ${product.colors ? `
@@ -1382,6 +1790,7 @@ function viewProduct(productId) {
                     <div class="product-sizes" id="modalColors">
                         ${product.colors.map(color => `<span class="size-tag" data-color="${color}">${color}</span>`).join('')}
                     </div>
+                    <div id="colorWarning" style="color:#e74c3c;font-size:0.78rem;display:none;margin-top:4px;"></div>
                 </div>
                 ` : ''}
                 <button class="btn-primary" id="modalAddToCartBtn" style="margin-top:18px;">
@@ -1397,39 +1806,51 @@ function viewProduct(productId) {
 
     // Highlight selected size
     const sizesDiv = document.getElementById('modalSizes');
+    const sizeWarning = document.getElementById('sizeWarning');
     if (sizesDiv) {
         sizesDiv.querySelectorAll('.size-tag').forEach(tag => {
             tag.onclick = function () {
                 sizesDiv.querySelectorAll('.size-tag').forEach(t => t.classList.remove('selected'));
                 this.classList.add('selected');
                 selectedSize = this.getAttribute('data-size');
+                if (sizeWarning) sizeWarning.style.display = 'none';
             };
         });
     }
 
     // Highlight selected color
     const colorsDiv = document.getElementById('modalColors');
+    const colorWarning = document.getElementById('colorWarning');
     if (colorsDiv) {
         colorsDiv.querySelectorAll('.size-tag').forEach(tag => {
             tag.onclick = function () {
                 colorsDiv.querySelectorAll('.size-tag').forEach(t => t.classList.remove('selected'));
                 this.classList.add('selected');
                 selectedColor = this.getAttribute('data-color');
+                if (colorWarning) colorWarning.style.display = 'none';
             };
         });
     }
 
     // Add to Cart button logic
     document.getElementById('modalAddToCartBtn').onclick = function () {
-        // Require selection
+        let hasError = false;
         if (product.sizes && !selectedSize) {
-            showToast('Please select a size.', 'warning');
-            return;
+            if (sizeWarning) {
+                sizeWarning.textContent = 'Please select a size.';
+                sizeWarning.style.display = 'block';
+            }
+            hasError = true;
         }
         if (product.colors && !selectedColor) {
-            showToast('Please select a color.', 'warning');
-            return;
+            if (colorWarning) {
+                colorWarning.textContent = 'Please select a color.';
+                colorWarning.style.display = 'block';
+            }
+            hasError = true;
         }
+        if (hasError) return;
+
         addToCart(product.id, selectedSize, selectedColor);
         hideProductPreview();
     };

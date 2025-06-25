@@ -157,6 +157,22 @@ h6 {
     color: #667eea;
 }
 
+/* User icon font size */
+#userIcon,
+.auth-btn .fa-user {
+    font-size: 22px !important;
+    display: inline-block;
+}
+
+/* Always show user icon on mobile, even if .auth-text is hidden */
+@media (max-width: 900px) {
+
+    #userIcon,
+    .auth-btn .fa-user {
+        display: inline-block !important;
+    }
+}
+
 .cart-count {
     background: #ff4757;
     color: white;
@@ -361,7 +377,7 @@ h6 {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 30px;
-    margin-bottom: 60px;
+    padding-bottom: 60px;
 }
 
 .product-card {
@@ -375,7 +391,8 @@ h6 {
 }
 
 .product-card:hover {
-    transform: translateY(-5px);
+    /* transform: translateY(-30px); */
+    scale: 1.05;
     box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
 }
 
@@ -644,7 +661,93 @@ h6 {
     text-align: right;
 }
 
+/* Cart Check Animation */
 
+.cart-check-overlay {
+    display: none;
+    position: fixed;
+    z-index: 5000;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.3s;
+}
+
+.cart-check-overlay.show {
+    display: flex;
+    animation: fadeInCartCheck 0.2s;
+}
+
+@keyframes fadeInCartCheck {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.cart-check-content {
+    background: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.cart-checkmark {
+    width: 90px;
+    height: 90px;
+    display: block;
+    stroke-width: 3;
+    stroke: #cdbafd;
+    stroke-miterlimit: 10;
+    margin: 0 auto 18px auto;
+    border-radius: 50%;
+}
+
+
+.cart-checkmark-circle {
+    stroke-dasharray: 166;
+    stroke-dashoffset: 166;
+    stroke: #cdbafd;
+    stroke-width: 3;
+    animation: cartCheckCircle 0.4s ease-in-out forwards;
+}
+
+.cart-checkmark-check {
+    stroke-dasharray: 48;
+    stroke-dashoffset: 48;
+    stroke: #cdbafd;
+    stroke-width: 4;
+    animation: cartCheckCheck 0.3s 0.35s cubic-bezier(.65, .05, .36, 1) forwards;
+}
+
+@keyframes cartCheckCircle {
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+@keyframes cartCheckCheck {
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+.cart-check-caption {
+    color: #fff;
+    font-size: 1.15rem;
+    font-weight: 600;
+    text-align: center;
+    letter-spacing: 0.01em;
+    max-width: 90vw;
+}
 
 .checkout-btn {
     width: 100%;
@@ -1337,7 +1440,7 @@ h6 {
     box-shadow: 0 4px 24px rgba(35, 41, 70, 0.12);
     color: #f4f4f4;
     display: flex;
-    flex-direction: column;    
+    flex-direction: column;
 }
 
 .contact-info-block .contact-info p,
@@ -1369,6 +1472,7 @@ h6 {
     flex-wrap: wrap;
     margin-top: 18px;
 }
+
 .social-btn {
     display: flex;
     align-items: center;
@@ -1666,7 +1770,7 @@ h6 {
 .product-sizes {
     display: flex;
     gap: 5px;
-    margin: 10px 0px 20px 0px;
+    margin: 10px 0px 0px 0px;
 }
 
 .size-tag {
@@ -2178,3 +2282,4 @@ body {
 body.fade-in {
     opacity: 1;
 }
+
